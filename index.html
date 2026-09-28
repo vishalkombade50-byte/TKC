@@ -4,6 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>The Household Ledger</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#5c0818">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ledger">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Cinzel:wght@600;700;900&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Pinyon+Script&display=swap" rel="stylesheet">
@@ -460,6 +468,38 @@
   .crest, .crest.big{ background:var(--seal) center/contain no-repeat; border-radius:0; box-shadow:none; font-size:0; color:transparent; text-shadow:none; filter:drop-shadow(0 6px 10px rgba(60,4,12,.45)); }
   .crest{ width:92px; height:93px; margin-bottom:6px; }
   .crest.big{ width:210px; height:212px; filter:drop-shadow(0 14px 26px rgba(0,0,0,.65)); }
+
+/* ---- v2 additions ---- */
+body{ position:relative; display:flow-root; }
+.royal-frame{ position:absolute; }
+nav.tabs{ overflow-x:auto; overflow-y:hidden; overscroll-behavior-x:contain; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+nav.tabs::-webkit-scrollbar{ display:none; height:0; }
+nav.tabs button{ margin-bottom:0; flex:none; }
+nav.tabs button::after{ bottom:0; }
+header.masthead{ position:relative; }
+.menu-btn{ position:absolute; top:-2px; right:-4px; width:40px; height:40px; border-radius:50%; border:1px solid var(--brass); outline:1px solid var(--paper-line); outline-offset:-4px; background:var(--card-bg); color:var(--crimson); cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; z-index:5; transition:transform .25s, box-shadow .25s; }
+.menu-btn:hover{ transform:translateY(-1px); box-shadow:0 4px 10px rgba(60,4,12,.3); }
+.menu-btn svg{ width:18px; height:18px; fill:currentColor; }
+.menu-panel{ position:absolute; top:44px; right:-4px; min-width:220px; background:var(--card-bg); border:1px solid var(--brass); outline:1px solid var(--paper-line); outline-offset:-4px; box-shadow:0 12px 28px rgba(60,4,12,.4); padding:8px 6px; z-index:45; display:none; text-align:left; }
+.menu-panel.open{ display:block; animation:pop .25s cubic-bezier(.2,1.2,.4,1); }
+.menu-panel button{ display:block; width:100%; text-align:left; background:none; border:none; padding:12px 14px; cursor:pointer; font-family:'Cinzel',serif; font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--ink); }
+.menu-panel button + button{ border-top:1px solid var(--paper-line); }
+.menu-panel button:hover{ background:rgba(184,134,43,.15); color:var(--crimson); }
+.tag.Saving{ color:var(--navy); }
+.modal.wide{ max-width:460px; }
+.sheet-note{ font-size:15px; color:var(--ink-soft); margin:0 0 12px; font-style:italic; }
+.sheet-actions{ display:flex; flex-direction:column; gap:10px; margin:12px 0; }
+.sheet-actions .btn{ width:100%; }
+.sheet-meta{ font-size:14px; color:var(--ink-soft); margin:10px 0 0; }
+.cat-tabs{ display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.cat-row{ display:flex; align-items:center; gap:8px; margin-bottom:8px; }
+.cat-row input[type=color]{ width:44px; height:38px; flex:none; padding:2px; }
+.cat-row input[type=text]{ flex:1; min-width:0; }
+.cat-row .lock{ font-size:11px; font-style:italic; color:var(--ink-soft); width:44px; text-align:center; flex:none; }
+.cat-row .del-btn{ width:44px; flex:none; }
+.worth-row{ display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid var(--paper-line); font-size:17px; }
+.worth-row.total{ border-bottom:3px double var(--brass); font-family:'Cinzel',serif; font-weight:700; color:var(--crimson); font-size:16px; }
+.terms p{ font-size:15px; margin:0 0 10px; }
 </style>
 </head>
 <body>
@@ -469,6 +509,13 @@
 <div class="wrap">
 
   <header class="masthead textured">
+    <button class="menu-btn" id="menuBtn" type="button" aria-label="Menu" aria-expanded="false"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2.2"/><circle cx="12" cy="12" r="2.2"/><circle cx="12" cy="19.5" r="2.2"/></svg></button>
+    <div class="menu-panel" id="menuPanel">
+      <button type="button" data-act="backup">Backup &amp; Restore</button>
+      <button type="button" data-act="cats">Edit Categories</button>
+      <button type="button" data-act="worth">Net Worth</button>
+      <button type="button" data-act="terms">Terms &amp; Conditions</button>
+    </div>
     <div class="crest"></div>
     <div class="est">Established MMXXVI</div>
     <h1>The Household Ledger</h1>
@@ -613,7 +660,9 @@
     <div class="custom-list" id="mList" style="margin-top:14px;"></div>
   </div></div>
 
-  <footer>Kept privately in this browser only — nothing here is sent anywhere. Clear your browser data and the ledger resets.</footer>
+  <div class="modal-back" id="sheet"><div class="modal wide"><h2 id="sheetTitle"></h2><div id="sheetBody"></div><div style="margin-top:16px;"><button class="btn secondary" type="button" id="sheetClose">Close</button></div></div></div>
+  <input type="file" id="restoreFile" accept=".json,application/json" hidden>
+  <footer>Kept privately on this device — nothing here is sent anywhere. Use the ⋮ menu to keep a backup.</footer>
 </div>
 
 <script>
@@ -636,6 +685,7 @@ function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(
 const DEFAULT_SETTINGS = {
   openingBalance: 58,
   customCats: [],
+  cats: null,
   loans: [
     {name:"Personal Loan 1", category:"EMI - Personal Loan 1", emi:4722, monthsLeft:24},
     {name:"Personal Loan 2", category:"EMI - Personal Loan 2", emi:3000, monthsLeft:7},
@@ -662,8 +712,8 @@ function load(){
     settings = s ? Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), JSON.parse(s)) : JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
   }catch(err){ settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS)); }
 }
-function saveEntries(){ try{ localStorage.setItem("ledger_v1_entries", JSON.stringify(entries)); }catch(e){} }
-function saveSettings(){ try{ localStorage.setItem("ledger_v1_settings", JSON.stringify(settings)); }catch(e){} }
+function saveEntries(){ try{ localStorage.setItem("ledger_v1_entries", JSON.stringify(entries)); }catch(e){} mirrorWrite(); }
+function saveSettings(){ try{ localStorage.setItem("ledger_v1_settings", JSON.stringify(settings)); }catch(e){} mirrorWrite(); }
 
 function allMonths(){
   const set = new Set(entries.map(e=>monthKey(e.date)));
@@ -705,12 +755,10 @@ function monthLabel(m){
 }
 
 const WITHDRAW_CATEGORIES = ["Emergency","Medical","Family Need","Other Withdrawal"];
-function catList(type){
-  const base = type==="Income" ? INCOME_CATEGORIES : type==="Withdrawal" ? WITHDRAW_CATEGORIES : EXPENSE_CATEGORIES;
-  return base.concat(settings.customCats.filter(c=>c.type===type).map(c=>c.name));
-}
+function catList(type){ return (settings.cats[type]||[]).map(c=>c.name); }
+function allCatNames(){ return [].concat(settings.cats.Expense,settings.cats.Income,settings.cats.Withdrawal).map(c=>c.name); }
 function catColor(name,i){
-  const c = settings.customCats.find(c=>c.name===name);
+  const c = [].concat(settings.cats.Expense,settings.cats.Income,settings.cats.Withdrawal).find(c=>c.name===name);
   return c ? c.color : PIE_COLORS[i%PIE_COLORS.length];
 }
 function populateCategorySelect(){
@@ -750,17 +798,19 @@ function renderAll(){
   renderLoans();
 }
 
+const SAVINGS_CAT = "Savings/Investment";
+function isSaving(e){ return e.type==="Expense" && e.category===SAVINGS_CAT; }
+function isEmi(e){ return e.type==="Expense" && !!e.category && (e.category.indexOf("EMI")===0 || settings.loans.some(l=>l.category===e.category)); }
 function monthTotals(m){
-  let income=0, expense=0, emi=0, withdrawn=0;
+  let income=0, expense=0, emi=0, saved=0, withdrawn=0;
   entries.filter(e=>monthKey(e.date)===m).forEach(e=>{
-    if(e.type==="Income") income += Number(e.amount);
-    else if(e.type==="Withdrawal") withdrawn += Number(e.amount);
-    else{
-      expense += Number(e.amount);
-      if(e.category && e.category.indexOf("EMI")===0) emi += Number(e.amount);
-    }
+    const a = Number(e.amount)||0;
+    if(e.type==="Income") income += a;
+    else if(e.type==="Withdrawal") withdrawn += a;
+    else if(isSaving(e)) saved += a;
+    else{ expense += a; if(isEmi(e)) emi += a; }
   });
-  return {income, expense, emi, withdrawn, net: income+withdrawn-expense};
+  return {income, expense, emi, saved, withdrawn, net: income-expense};
 }
 
 function allTimeBalance(){
@@ -798,8 +848,9 @@ function renderDashboard(){
     {label:"Income", value:t.income, color:"var(--forest)"},
     {label:"Expense", value:t.expense, color:"var(--oxblood)"},
     {label:"EMI Paid", value:t.emi, color:"var(--navy)"},
+    {label:"Moved to Savings", value:t.saved, color:"var(--brass)"},
     {label:"Savings Withdrawn", value:t.withdrawn, color:"var(--brass-bright)"},
-    {label:"Net Savings", value:t.net, color:"var(--brass)"}
+    {label:"Net Savings", value:t.net, color:"var(--forest)"}
   ];
   const maxV = Math.max(1, ...barData.map(b=>Math.abs(b.value)));
   document.getElementById("barChart").innerHTML = barData.map(b=>`
@@ -813,7 +864,7 @@ function renderDashboard(){
 
 function categoryBreakdown(m){
   const totals = {};
-  entries.filter(e=>monthKey(e.date)===m && e.type==="Expense").forEach(e=>{
+  entries.filter(e=>monthKey(e.date)===m && e.type==="Expense" && !isSaving(e)).forEach(e=>{
     totals[e.category] = (totals[e.category]||0) + Number(e.amount);
   });
   return Object.entries(totals).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
@@ -854,7 +905,7 @@ function renderHistory(){
   body.innerHTML = rows.slice().reverse().map(e=>`
     <tr>
       <td>${new Date(e.date).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</td>
-      <td><span class="tag ${e.type}">${e.type}</span></td>
+      <td><span class="tag ${isSaving(e)?'Saving':e.type}">${isSaving(e)?'Saving':e.type}</span></td>
       <td>${e.category}</td>
       <td>${e.note ? e.note : "—"}</td>
       <td class="amt ${e.type!=='Expense'?'pos':'neg'}">${e.type!=='Expense'?'+':'-'}${fmt(e.amount)}</td>
@@ -987,7 +1038,7 @@ document.getElementById("addLoanBtn").addEventListener("click", ()=>{
   let n = settings.loans.length + 1;
   while(catList("Expense").includes("EMI - New Loan "+n)) n++;
   const cname = "EMI - New Loan "+n;
-  settings.customCats.push({type:"Expense", name:cname, color:"#2c3e4a"});
+  settings.cats.Expense.push({name:cname, color:"#2c3e4a", custom:true});
   settings.loans.push({name:"New Loan "+n, category:cname, emi:0, monthsLeft:0});
   populateCategorySelect();
   saveSettings();
@@ -1005,7 +1056,7 @@ const SWATCHES = ["#6f242a","#33503a","#9c7429","#2c3e4a","#5e4a7a","#a3562f","#
 const $ = id => document.getElementById(id);
 function renderCustomList(){
   const type = $("fType").value;
-  const list = settings.customCats.filter(c=>c.type===type);
+  const list = settings.cats[type].filter(c=>c.custom);
   $("mList").innerHTML = list.length ? "<label>Your categories</label>" + list.map(c=>
     `<div class="row"><span class="swatch" style="background:${c.color}"></span><span>${c.name}</span><button type="button" class="del-btn" style="margin-left:auto;" title="Delete" onclick="removeCat('${c.name}')">✕</button></div>`).join("") : "";
 }
@@ -1022,9 +1073,9 @@ function saveCat(){
   const name = $("mName").value.replace(/[<>&"'\\]/g,"").trim();
   const type = $("fType").value;
   if(!name) return;
-  const all = [...INCOME_CATEGORIES, ...EXPENSE_CATEGORIES, ...WITHDRAW_CATEGORIES, ...settings.customCats.map(c=>c.name)];
+  const all = allCatNames();
   if(all.some(c=>c.toLowerCase()===name.toLowerCase())){ alert("That category already exists."); return; }
-  settings.customCats.push({type, name, color:$("mColor").value});
+  settings.cats[type].push({name, color:$("mColor").value, custom:true});
   saveSettings();
   populateCategorySelect();
   $("fCategory").value = name;
@@ -1034,7 +1085,7 @@ function saveCat(){
 }
 function removeCat(name){
   if(!confirm('Delete category "'+name+'"? Past entries keep their name.')) return;
-  settings.customCats = settings.customCats.filter(c=>c.name!==name);
+  { const ty=$("fType").value; settings.cats[ty] = settings.cats[ty].filter(c=>c.name!==name); }
   saveSettings();
   populateCategorySelect(); renderCustomList(); renderDashboard(); renderCategories();
 }
@@ -1046,8 +1097,150 @@ $("catModal").addEventListener("click", ev=>{ if(ev.target.id==="catModal") clos
 $("mSwatches").addEventListener("click", ev=>{ if(ev.target.dataset.c) $("mColor").value = ev.target.dataset.c; });
 $("fCategory").addEventListener("change", updateGoalField);
 
+/* ================= v2: safety copy, backup, menu, categories, net worth ================= */
+var _mt=null, _catTab="Expense";
+function escHtml(x){ return String(x).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function cleanName(x){ return String(x).replace(/[<>&"'\\]/g,"").trim(); }
+function migrateCats(){
+  if(settings.cats && settings.cats.Expense && settings.cats.Income && settings.cats.Withdrawal) return;
+  const mk=(names,o)=>names.map((n,i)=>({name:n,color:PIE_COLORS[(i+o)%PIE_COLORS.length]}));
+  const cats={Expense:mk(EXPENSE_CATEGORIES,0),Income:mk(INCOME_CATEGORIES,1),Withdrawal:mk(WITHDRAW_CATEGORIES,3)};
+  (settings.customCats||[]).forEach(c=>{ if(cats[c.type]) cats[c.type].push({name:c.name,color:c.color,custom:true}); });
+  settings.cats=cats; saveSettings();
+}
+/* automatic safety copy inside the browser (IndexedDB) */
+function idb(){ return new Promise(function(res,rej){ try{ var r=indexedDB.open("household_ledger_mirror",1); r.onupgradeneeded=function(){ r.result.createObjectStore("kv"); }; r.onsuccess=function(){ res(r.result); }; r.onerror=function(){ rej(r.error); }; }catch(e){ rej(e); } }); }
+function mirrorGet(){ return idb().then(function(db){ return new Promise(function(res){ var q=db.transaction("kv").objectStore("kv").get("latest"); q.onsuccess=function(){ res(q.result||null); }; q.onerror=function(){ res(null); }; }); }).catch(function(){ return null; }); }
+function mirrorWrite(){
+  clearTimeout(_mt);
+  _mt=setTimeout(async function(){ try{
+    if(!entries.length){ var cur=await mirrorGet(); if(cur&&cur.entries&&cur.entries.length) return; }
+    var db=await idb(); db.transaction("kv","readwrite").objectStore("kv").put({savedAt:Date.now(),entries:entries,settings:settings},"latest");
+  }catch(e){} },400);
+}
+function applyData(e,st){
+  entries=e; settings=Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)),st||{});
+  migrateCats(); saveEntries(); saveSettings(); populateCategorySelect(); renderAll();
+}
+async function checkRecovery(){ try{
+  if(entries.length || localStorage.getItem("ledger_v1_entries")!==null) return;
+  var m=await mirrorGet();
+  if(m&&m.entries&&m.entries.length&&confirm("Your ledger looks empty, but an automatic safety copy from "+new Date(m.savedAt).toLocaleString("en-IN")+" was found ("+m.entries.length+" entries). Restore it?")){ applyData(m.entries,m.settings); showToast("Ledger restored"); }
+}catch(e){} }
+/* backup files */
+function markBackup(){ try{ localStorage.setItem("ledger_v1_lastBackup",new Date().toISOString()); }catch(e){} }
+function lastBackupText(){ try{ var v=localStorage.getItem("ledger_v1_lastBackup"); return v?new Date(v).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"}):"never"; }catch(e){ return "never"; } }
+function backupPayload(){ return JSON.stringify({app:"household-ledger",version:2,exportedAt:new Date().toISOString(),entries:entries,settings:settings},null,1); }
+function backupName(){ return "household-ledger-backup-"+todayStr()+".json"; }
+function downloadBackup(){
+  var a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([backupPayload()],{type:"application/json"})); a.download=backupName();
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); },1500);
+  markBackup(); showToast("Backup file saved");
+}
+async function shareBackup(){ try{
+  var f=new File([backupPayload()],backupName(),{type:"application/json"});
+  if(navigator.canShare&&navigator.canShare({files:[f]})){ await navigator.share({files:[f],title:"Household Ledger backup"}); markBackup(); showToast("Backup shared"); } else downloadBackup();
+}catch(e){} }
+function restoreFromFile(file){
+  var r=new FileReader();
+  r.onload=function(){ try{
+    var d=JSON.parse(r.result); if(!d||!Array.isArray(d.entries)||typeof d.settings!=="object") throw 0;
+    if(!confirm("Replace the ledger on this device with this backup ("+d.entries.length+" entries)?")) return;
+    applyData(d.entries,d.settings); closeSheet(); showToast("Ledger restored");
+  }catch(e){ alert("That file is not a Household Ledger backup."); } };
+  r.readAsText(file);
+}
+async function restoreSafetyCopy(){
+  var m=await mirrorGet();
+  if(!m||!m.entries){ alert("No automatic safety copy was found on this device."); return; }
+  if(confirm("Restore the safety copy from "+new Date(m.savedAt).toLocaleString("en-IN")+" ("+m.entries.length+" entries)?")){ applyData(m.entries,m.settings); closeSheet(); showToast("Ledger restored"); }
+}
+/* sheets */
+function openSheet(title,html){ $("sheetTitle").textContent=title; $("sheetBody").innerHTML=html; $("sheet").classList.add("open"); }
+function closeSheet(){ $("sheet").classList.remove("open"); }
+function openBackupSheet(){
+  var can=false; try{ can=!!(navigator.canShare&&navigator.canShare({files:[new File(["{}"],"a.json",{type:"application/json"})]})); }catch(e){}
+  openSheet("Backup & Restore",
+   '<p class="sheet-note">Every entry is saved automatically on this device. A backup file protects you if the browser is cleared or you change phones.</p><div class="sheet-actions">'+
+   '<button class="btn" type="button" onclick="downloadBackup()">Save backup file</button>'+
+   (can?'<button class="btn" type="button" onclick="shareBackup()">Share / send backup</button>':'')+
+   '<button class="btn secondary" type="button" onclick="document.getElementById(\'restoreFile\').click()">Restore from backup file</button>'+
+   '<button class="btn secondary" type="button" onclick="restoreSafetyCopy()">Restore automatic safety copy</button></div>'+
+   '<p class="sheet-meta">Last backup file: <b>'+lastBackupText()+'</b><br>Automatic safety copy: <b id="safetyInfo">checking…</b></p>');
+  mirrorGet().then(function(m){ var el=$("safetyInfo"); if(el) el.textContent=(m&&m.savedAt)?new Date(m.savedAt).toLocaleString("en-IN"):"none yet"; });
+}
+function refreshCatUI(){
+  var cur=$("fCategory").value; populateCategorySelect();
+  if(catList($("fType").value).includes(cur)){ $("fCategory").value=cur; updateGoalField(); }
+  renderDashboard(); renderCategories(); renderHistory(); renderLoans();
+}
+function catsSheetHtml(){
+  var t=_catTab, list=settings.cats[t];
+  var tabs=["Expense","Income","Withdrawal"].map(function(x){ return '<button type="button" class="btn small'+(x===t?'':' secondary')+'" onclick="catTab(\''+x+'\')">'+x+'</button>'; }).join("");
+  var rows=list.map(function(c,i){
+    var sys=(t==="Expense"&&c.name===SAVINGS_CAT), loan=(t==="Expense"&&settings.loans.some(function(l){ return l.category===c.name; }));
+    return '<div class="cat-row"><input type="color" value="'+c.color+'" onchange="catColorSet(\''+t+'\','+i+',this.value)">'+
+     '<input type="text" maxlength="30" value="'+escHtml(c.name)+'"'+(sys?' disabled':'')+' onchange="catRename(\''+t+'\','+i+',this)">'+
+     ((sys||loan)?'<span class="lock">'+(sys?'system':'loan')+'</span>':'<button type="button" class="del-btn" title="Delete" onclick="catDelete(\''+t+'\','+i+')">✕</button>')+'</div>';
+  }).join("");
+  return '<p class="sheet-note">Rename or recolour any category. Renaming also updates your past entries.</p><div class="cat-tabs">'+tabs+'</div>'+rows+
+   '<div class="cat-row" style="margin-top:14px;"><input type="color" id="ncColor" value="#9c7429"><input type="text" id="ncName" maxlength="30" placeholder="New category name"><button type="button" class="btn small" onclick="catAdd()">Add</button></div>';
+}
+function openCatsSheet(){ _catTab="Expense"; openSheet("Edit Categories",catsSheetHtml()); }
+function catTab(t){ _catTab=t; $("sheetBody").innerHTML=catsSheetHtml(); }
+function catColorSet(t,i,v){ settings.cats[t][i].color=v; saveSettings(); renderDashboard(); renderCategories(); }
+function catRename(t,i,inp){
+  var old=settings.cats[t][i].name, nn=cleanName(inp.value);
+  if(!nn||nn===old){ inp.value=old; return; }
+  if(allCatNames().some(function(n){ return n.toLowerCase()===nn.toLowerCase()&&n!==old; })){ alert("That category already exists."); inp.value=old; return; }
+  settings.cats[t][i].name=nn;
+  entries.forEach(function(e){ if(e.category===old&&e.type===t) e.category=nn; });
+  if(t==="Expense") settings.loans.forEach(function(l){ if(l.category===old) l.category=nn; });
+  saveEntries(); saveSettings(); refreshCatUI(); $("sheetBody").innerHTML=catsSheetHtml();
+}
+function catDelete(t,i){
+  var c=settings.cats[t][i]; if(!confirm('Delete category "'+c.name+'"? Past entries keep their name.')) return;
+  settings.cats[t].splice(i,1); saveSettings(); refreshCatUI(); $("sheetBody").innerHTML=catsSheetHtml();
+}
+function catAdd(){
+  var nn=cleanName($("ncName").value); if(!nn) return;
+  if(allCatNames().some(function(n){ return n.toLowerCase()===nn.toLowerCase(); })){ alert("That category already exists."); return; }
+  settings.cats[_catTab].push({name:nn,color:$("ncColor").value,custom:true}); saveSettings(); refreshCatUI(); $("sheetBody").innerHTML=catsSheetHtml();
+}
+function openWorthSheet(){
+  var bal=allTimeBalance();
+  var goals=settings.goals.reduce(function(s,g){ return s+(Number(g.current)||0); },0);
+  var other=0; entries.forEach(function(e){ if(e.goal) return; if(isSaving(e)) other+=Number(e.amount)||0; else if(e.type==="Withdrawal") other-=Number(e.amount)||0; });
+  other=Math.max(0,other);
+  var owed=settings.loans.reduce(function(s,l){ var m=Number(l.monthsLeft)||0; return s+(m>0?(Number(l.emi)||0)*m:0); },0);
+  var worth=bal+goals+other-owed, row=function(a,b,c){ return '<div class="worth-row"><span>'+a+'</span><span'+(c?' style="color:'+c+'"':'')+'>'+b+'</span></div>'; };
+  openSheet("Net Worth",
+   '<p class="sheet-note">What you own, less what you still owe.</p>'+
+   row("Cash balance",fmt(bal))+row("Savings in goals",fmt(goals))+row("Other logged savings",fmt(other))+
+   row("Remaining loan payments","− "+fmt(owed),"var(--oxblood)")+
+   '<div class="worth-row total"><span>Net worth</span><span style="color:'+(worth<0?'var(--oxblood)':'var(--forest)')+'">'+fmt(worth)+'</span></div>'+
+   '<p class="sheet-meta">Remaining loan payments = EMI × months left, as entered on the Loans page.</p>');
+}
+function openTermsSheet(){
+  openSheet("Terms & Conditions",'<div class="terms">'+
+   '<p><b>1. Purpose.</b> The Household Ledger is a personal record-keeping tool. It is not financial, tax or legal advice.</p>'+
+   '<p><b>2. Your data stays with you.</b> Everything you enter is stored on this device, in this browser. Nothing is uploaded, shared or sent to any server, and no account is needed.</p>'+
+   '<p><b>3. Backups are your responsibility.</b> Clearing browser data, switching browser or phone, or a device fault can erase your ledger. Use Backup &amp; Restore regularly.</p>'+
+   '<p><b>4. Accuracy.</b> All figures, including net worth, are calculated only from what you enter and are estimates. Check loan details with your lender.</p>'+
+   '<p><b>5. No warranty.</b> The app is provided as is, without warranty of any kind. The creator is not liable for any loss arising from its use.</p>'+
+   '<p><b>6. Updates.</b> The app may change over time. Continuing to use it means you accept these terms.</p></div>');
+}
+function toggleMenu(f){ var p=$("menuPanel"), o=(f!==undefined)?f:!p.classList.contains("open"); p.classList.toggle("open",o); $("menuBtn").setAttribute("aria-expanded",o); }
+$("menuBtn").addEventListener("click",function(ev){ ev.stopPropagation(); toggleMenu(); });
+document.addEventListener("click",function(ev){ if(!ev.target.closest("#menuPanel")) toggleMenu(false); });
+document.addEventListener("keydown",function(ev){ if(ev.key==="Escape"){ toggleMenu(false); closeSheet(); } });
+$("menuPanel").addEventListener("click",function(ev){ var b=ev.target.closest("button[data-act]"); if(!b) return; toggleMenu(false); ({backup:openBackupSheet,cats:openCatsSheet,worth:openWorthSheet,terms:openTermsSheet})[b.dataset.act](); });
+$("sheetClose").addEventListener("click",closeSheet);
+$("sheet").addEventListener("click",function(ev){ if(ev.target.id==="sheet") closeSheet(); });
+$("restoreFile").addEventListener("change",function(ev){ var f=ev.target.files&&ev.target.files[0]; if(f) restoreFromFile(f); ev.target.value=""; });
+
 /* ---------- init ---------- */
-load();
+load(); migrateCats(); try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){} if(entries.length) mirrorWrite();
 document.getElementById("fDate").value = todayStr();
 populateCategorySelect();
 renderAll();
@@ -1056,7 +1249,7 @@ renderAll();
 (function(){
   const el = document.getElementById("intro"); let done = false;
   const ready = ()=>{ if(done) return; done = true; document.body.classList.add("ready"); Object.keys(_shown).forEach(k=>delete _shown[k]); renderDashboard(); };
-  const kill = ()=>{ ready(); el.classList.add("gone"); setTimeout(()=>el.remove(),800); };
+  const kill = ()=>{ ready(); el.classList.add("gone"); setTimeout(()=>el.remove(),800); if(!window._rec){ window._rec=1; setTimeout(checkRecovery,900); } };
   el.addEventListener("click", kill);
   if(matchMedia("(prefers-reduced-motion: reduce)").matches) kill(); else { setTimeout(ready,2300); setTimeout(kill,3900); }
 })();
