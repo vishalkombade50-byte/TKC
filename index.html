@@ -549,7 +549,7 @@ header.masthead{ position:relative; }
         <div class="stat expense"><div class="stat-label">Expense this month</div><div class="stat-value" id="statExpense">₹0</div></div>
         <div class="stat emi"><div class="stat-label">EMI paid this month</div><div class="stat-value" id="statEmi">₹0</div></div>
         <div class="stat"><div class="stat-label">Left after expenses</div><div class="stat-value" id="statNet">₹0</div></div>
-        <div class="stat"><div class="stat-label">Cash change this month</div><div class="stat-value" id="statCash">₹0</div></div>
+        <div class="stat"><div class="stat-label">Total money (cash + savings)</div><div class="stat-value" id="statCash">₹0</div></div>
       </div>
 
       <div class="card textured">
@@ -856,9 +856,9 @@ function renderDashboard(){
   countTo("statIncome",t.income);
   countTo("statExpense",t.expense);
   countTo("statEmi",t.emi);
-  countTo("statNet",t.net); countTo("statCash",t.cash);
+  countTo("statNet",t.net); countTo("statCash",totalMoney());
   document.getElementById("statNet").style.color = t.net<0 ? "var(--oxblood)" : "var(--forest)";
-  document.getElementById("statCash").style.color = t.cash<0 ? "var(--oxblood)" : "var(--forest)";
+  document.getElementById("statCash").style.color = totalMoney()<0 ? "var(--oxblood)" : "var(--forest)";
 
   const barData = [
     {label:"Income", value:t.income, color:"var(--forest)"},
@@ -866,8 +866,7 @@ function renderDashboard(){
     {label:"↳ of which EMI", value:t.emi, color:"var(--navy)"},
     {label:"Moved to Savings", value:t.saved, color:"var(--brass)"},
     {label:"Savings Withdrawn", value:t.withdrawn, color:"var(--brass-bright)"},
-    {label:"Left after expenses", value:t.net, color:t.net<0?"var(--oxblood)":"var(--forest)"},
-    {label:"Cash change", value:t.cash, color:t.cash<0?"var(--oxblood)":"var(--forest)"}
+    {label:"Left after expenses", value:t.net, color:t.net<0?"var(--oxblood)":"var(--forest)"}
   ];
   const maxV = Math.max(1, ...barData.map(b=>Math.abs(b.value)));
   document.getElementById("barChart").innerHTML = barData.map(b=>`
@@ -976,7 +975,7 @@ function renderGoals(){
 function updateGoal(i, field, val){
   settings.goals[i][field] = Number(val)||0;
   saveSettings();
-  renderGoals();
+  renderGoals(); renderDashboard();
 }
 
 function renderLoans(){
@@ -1263,6 +1262,7 @@ $("restoreFile").addEventListener("change",function(ev){ var f=ev.target.files&&
 
 /* ---------- v3 additions ---------- */
 function cleanEntries(a){ return a.filter(e=>e&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&["Income","Expense","Withdrawal"].includes(e.type)&&Number(e.amount)>0).map((e,i)=>({...e,id:String(e.id||uid()+i),amount:Number(e.amount),category:String(e.category||"Other"),note:String(e.note||""),createdAt:Number(e.createdAt)||(Date.parse(e.date)+i)})); }
+function totalMoney(){ return allTimeBalance()+settings.goals.reduce((s,g)=>s+(Number(g.current)||0),0)+Math.max(0,poolBal()); }
 function poolBal(){ let p=0; entries.forEach(e=>{ if(e.goal) return; if(isSaving(e)) p+=Number(e.amount)||0; else if(e.type==="Withdrawal") p-=Number(e.amount)||0; }); return p; }
 function saveEntryData(o, replaceId){
   const snap=JSON.stringify({entries:entries,goals:settings.goals,loans:settings.loans});
@@ -1321,7 +1321,7 @@ function deleteGoal(i){
   var g=settings.goals[i];
   if(!confirm('Delete goal "'+g.name+'"? Its entries stay in the ledger and move to General savings.')) return;
   entries.forEach(e=>{ if(e.goal===g.name) e.goal=""; });
-  settings.goals.splice(i,1); saveEntries(); saveSettings(); renderGoals(); updateGoalField();
+  settings.goals.splice(i,1); saveEntries(); saveSettings(); renderGoals(); updateGoalField(); renderDashboard();
 }
 function renderIncomeCats(m){
   document.getElementById("incMonthLabel").textContent=monthLabel(m);
