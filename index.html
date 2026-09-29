@@ -500,6 +500,8 @@ header.masthead{ position:relative; }
 .worth-row{ display:flex; justify-content:space-between; gap:10px; padding:8px 0; border-bottom:1px solid var(--paper-line); font-size:17px; }
 .worth-row.total{ border-bottom:3px double var(--brass); font-family:'Cinzel',serif; font-weight:700; color:var(--crimson); font-size:16px; }
 .terms p{ font-size:15px; margin:0 0 10px; }
+.loan-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end;}
+.goal-edit{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end;}
 </style>
 </head>
 <body>
@@ -546,7 +548,8 @@ header.masthead{ position:relative; }
         <div class="stat income"><div class="stat-label">Income this month</div><div class="stat-value" id="statIncome">₹0</div></div>
         <div class="stat expense"><div class="stat-label">Expense this month</div><div class="stat-value" id="statExpense">₹0</div></div>
         <div class="stat emi"><div class="stat-label">EMI paid this month</div><div class="stat-value" id="statEmi">₹0</div></div>
-        <div class="stat"><div class="stat-label">Net savings this month</div><div class="stat-value" id="statNet">₹0</div></div>
+        <div class="stat"><div class="stat-label">Left after expenses</div><div class="stat-value" id="statNet">₹0</div></div>
+        <div class="stat"><div class="stat-label">Cash change this month</div><div class="stat-value" id="statCash">₹0</div></div>
       </div>
 
       <div class="card textured">
@@ -581,7 +584,7 @@ header.masthead{ position:relative; }
               <div class="cat-line"><select id="fCategory" required></select><button type="button" class="btn small" id="addCatBtn">+ New</button></div>
             </div>
             <div class="field" id="goalField" style="display:none;"><label id="goalLabel">Savings goal</label><select id="fGoal"></select></div>
-            <div class="field"><label>Amount (₹)</label><input type="number" id="fAmount" min="0" step="1" required placeholder="0"></div>
+            <div class="field"><label>Amount (₹)</label><input type="number" id="fAmount" min="0" step="0.01" required placeholder="0"></div>
           </div>
           <div class="field" style="margin-top:14px;"><label>Note (optional)</label><input type="text" id="fNote" placeholder="e.g. Petrol for the bike"></div>
           <div style="margin-top:16px;"><button type="submit" class="btn">Add to Ledger</button></div>
@@ -593,6 +596,7 @@ header.masthead{ position:relative; }
     <section class="page" id="page-history">
       <div class="card textured">
         <h2>Complete Transaction History</h2>
+        <div class="cat-row" style="margin-bottom:10px;"><select id="hMonth"></select><input type="text" id="hSearch" placeholder="Search note or category"></div>
         <div style="overflow-x:auto;">
           <table class="ledger" id="historyTable">
             <thead><tr><th>Date</th><th>Type</th><th>Category</th><th>Note</th><th style="text-align:right;">Amount</th><th style="text-align:right;">Balance</th><th></th></tr></thead>
@@ -616,6 +620,15 @@ header.masthead{ position:relative; }
           <tbody id="catBody"></tbody>
         </table>
       </div>
+      <div class="card textured">
+        <h2>Income by Category — <span id="incMonthLabel"></span></h2>
+        <div class="pie-wrap"><div class="pie" id="incPie"></div><div class="legend" id="incLegend"></div></div>
+        <hr class="rule">
+        <table class="ledger">
+          <thead><tr><th>Category</th><th style="text-align:right;">Amount</th><th style="text-align:right;">% of Total</th></tr></thead>
+          <tbody id="incBody"></tbody>
+        </table>
+      </div>
     </section>
 
     <!-- GOALS -->
@@ -623,6 +636,7 @@ header.masthead{ position:relative; }
       <div class="card textured">
         <h2>My Goals</h2>
         <div id="goalsList"></div>
+        <button class="btn small" id="addGoalBtn" type="button" style="margin-top:6px;">+ Add goal</button>
       </div>
       <div class="card textured">
         <h3>Net logged savings (deposits minus withdrawals)</h3>
@@ -662,7 +676,7 @@ header.masthead{ position:relative; }
 
   <div class="modal-back" id="sheet"><div class="modal wide"><h2 id="sheetTitle"></h2><div id="sheetBody"></div><div style="margin-top:16px;"><button class="btn secondary" type="button" id="sheetClose">Close</button></div></div></div>
   <input type="file" id="restoreFile" accept=".json,application/json" hidden>
-  <footer>Kept privately on this device — nothing here is sent anywhere. Use the ⋮ menu to keep a backup.</footer>
+  <footer>Your entries are kept privately on this device and never uploaded (only the decorative fonts load from Google). Use the ⋮ menu to keep a backup.</footer>
 </div>
 
 <script>
@@ -673,17 +687,17 @@ const INCOME_CATEGORIES = ["Income - Driving Job","Income - Other"];
 
 const PIE_COLORS = ["#8b1024","#b8862b","#5a0a18","#d4a84a","#a91d36","#7a5a1c","#c45a6a","#e6c877","#6b2a35","#9a7a3a","#d98a94","#4a3a1a","#b03a4a","#8a6a2a","#f0d9a0"]; const _OLD_PIE = ["#6f242a","#33503a","#9c7429","#2c3e4a","#8a5a2b","#4a6741","#a3562f","#5e4a7a","#7a7a3a","#5a3a3a","#3a5a5a","#8a3a5a","#6a6a2a","#3a4a6a","#7a4a2a"];
 
-function todayStr(){ const d=new Date(); return d.toISOString().slice(0,10); }
+function todayStr(){ const d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
 function monthKey(dateStr){ return dateStr ? dateStr.slice(0,7) : ""; }
 function fmt(n){
-  n = Math.round(n||0);
+  n = Math.round((Number(n)||0)*100)/100;
   const neg = n < 0; n = Math.abs(n);
-  return (neg?"-":"") + "₹" + n.toLocaleString("en-IN");
+  return (neg?"-":"") + "₹" + n.toLocaleString("en-IN",{minimumFractionDigits:(n%1?2:0),maximumFractionDigits:2});
 }
 function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
 
 const DEFAULT_SETTINGS = {
-  openingBalance: 58,
+  openingBalance: 0,
   customCats: [],
   cats: null,
   loans: [
@@ -699,6 +713,7 @@ const DEFAULT_SETTINGS = {
   ]
 };
 
+let _sf=0; function saveFail(){ if(Date.now()-_sf>30000){ _sf=Date.now(); alert("⚠ Could not save to this browser (storage full or blocked). Please save a backup file now from the ⋮ menu."); } }
 let entries = [];
 let settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
 
@@ -712,8 +727,8 @@ function load(){
     settings = s ? Object.assign(JSON.parse(JSON.stringify(DEFAULT_SETTINGS)), JSON.parse(s)) : JSON.parse(JSON.stringify(DEFAULT_SETTINGS));
   }catch(err){ settings = JSON.parse(JSON.stringify(DEFAULT_SETTINGS)); }
 }
-function saveEntries(){ try{ localStorage.setItem("ledger_v1_entries", JSON.stringify(entries)); }catch(e){} mirrorWrite(); }
-function saveSettings(){ try{ localStorage.setItem("ledger_v1_settings", JSON.stringify(settings)); }catch(e){} mirrorWrite(); }
+function saveEntries(){ try{ localStorage.setItem("ledger_v1_entries", JSON.stringify(entries)); }catch(e){ saveFail(); } mirrorWrite(); }
+function saveSettings(){ try{ localStorage.setItem("ledger_v1_settings", JSON.stringify(settings)); }catch(e){ saveFail(); } mirrorWrite(); }
 
 function allMonths(){
   const set = new Set(entries.map(e=>monthKey(e.date)));
@@ -763,7 +778,7 @@ function catColor(name,i){
 }
 function populateCategorySelect(){
   const type = document.getElementById("fType").value;
-  document.getElementById("fCategory").innerHTML = catList(type).map(c=>`<option value="${c}">${c}</option>`).join("");
+  document.getElementById("fCategory").innerHTML = catList(type).map(c=>`<option value="${escHtml(c)}">${escHtml(c)}</option>`).join("");
   updateGoalField();
 }
 function updateGoalField(){
@@ -772,7 +787,7 @@ function updateGoalField(){
   const show = type==="Withdrawal" || (type==="Expense" && cat==="Savings/Investment");
   document.getElementById("goalField").style.display = show ? "" : "none";
   document.getElementById("goalLabel").textContent = type==="Withdrawal" ? "Take from goal" : "Add to goal (optional)";
-  document.getElementById("fGoal").innerHTML = `<option value="">${type==="Withdrawal" ? "General savings (no goal)" : "No specific goal"}</option>` + settings.goals.map(g=>`<option value="${g.name}">${g.name}</option>`).join("");
+  document.getElementById("fGoal").innerHTML = `<option value="">${type==="Withdrawal" ? "General savings (no goal)" : "No specific goal"}</option>` + settings.goals.map(g=>`<option value="${escHtml(g.name)}">${escHtml(g.name)}</option>`).join("");
 }
 function applyGoal(e){
   if(!e.goal) return;
@@ -810,7 +825,7 @@ function monthTotals(m){
     else if(isSaving(e)) saved += a;
     else{ expense += a; if(isEmi(e)) emi += a; }
   });
-  return {income, expense, emi, saved, withdrawn, net: income-expense};
+  return {income, expense, emi, saved, withdrawn, net: income-expense, cash: income+withdrawn-expense-saved};
 }
 
 function allTimeBalance(){
@@ -841,16 +856,18 @@ function renderDashboard(){
   countTo("statIncome",t.income);
   countTo("statExpense",t.expense);
   countTo("statEmi",t.emi);
-  countTo("statNet",t.net);
+  countTo("statNet",t.net); countTo("statCash",t.cash);
   document.getElementById("statNet").style.color = t.net<0 ? "var(--oxblood)" : "var(--forest)";
+  document.getElementById("statCash").style.color = t.cash<0 ? "var(--oxblood)" : "var(--forest)";
 
   const barData = [
     {label:"Income", value:t.income, color:"var(--forest)"},
-    {label:"Expense", value:t.expense, color:"var(--oxblood)"},
-    {label:"EMI Paid", value:t.emi, color:"var(--navy)"},
+    {label:"Expense (all)", value:t.expense, color:"var(--oxblood)"},
+    {label:"↳ of which EMI", value:t.emi, color:"var(--navy)"},
     {label:"Moved to Savings", value:t.saved, color:"var(--brass)"},
     {label:"Savings Withdrawn", value:t.withdrawn, color:"var(--brass-bright)"},
-    {label:"Net Savings", value:t.net, color:"var(--forest)"}
+    {label:"Left after expenses", value:t.net, color:t.net<0?"var(--oxblood)":"var(--forest)"},
+    {label:"Cash change", value:t.cash, color:t.cash<0?"var(--oxblood)":"var(--forest)"}
   ];
   const maxV = Math.max(1, ...barData.map(b=>Math.abs(b.value)));
   document.getElementById("barChart").innerHTML = barData.map(b=>`
@@ -870,13 +887,13 @@ function categoryBreakdown(m){
   return Object.entries(totals).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
 }
 
-function renderPie(pieId, legendId, data){
+function renderPie(pieId, legendId, data, emptyMsg){
   const pieEl = document.getElementById(pieId);
   const legendEl = document.getElementById(legendId);
   const total = data.reduce((s,[k,v])=>s+v,0);
   if(total<=0){
     pieEl.style.background = "var(--paper-shadow)";
-    legendEl.innerHTML = `<div class="empty-note">No expenses logged for this month yet.</div>`;
+    legendEl.innerHTML = `<div class="empty-note">${emptyMsg||"No expenses logged for this month yet."}</div>`;
     return;
   }
   let acc = 0;
@@ -887,7 +904,7 @@ function renderPie(pieId, legendId, data){
   pieEl.style.background = `conic-gradient(${stops.join(",")})`;
   legendEl.innerHTML = data.map(([k,v],i)=>`
     <div class="row"><span class="swatch" style="background:${catColor(k,i)}"></span>
-    <span>${k}</span><span style="margin-left:auto;color:var(--ink-soft);">${fmt(v)} · ${(v/total*100).toFixed(1)}%</span></div>`).join("");
+    <span>${escHtml(k)}</span><span style="margin-left:auto;color:var(--ink-soft);">${fmt(v)} · ${(v/total*100).toFixed(1)}%</span></div>`).join("");
 }
 
 function renderHistory(){
@@ -896,26 +913,34 @@ function renderHistory(){
     body.innerHTML = `<tr><td colspan="7" class="empty-note">No entries yet — add your first one under "Add Entry".</td></tr>`;
     return;
   }
-  const sorted = [...entries].sort((a,b)=> a.date===b.date ? a.createdAt-b.createdAt : a.date.localeCompare(b.date));
+  const sorted = [...entries].sort((a,b)=> a.date===b.date ? (a.createdAt||0)-(b.createdAt||0) : a.date.localeCompare(b.date));
   let running = Number(settings.openingBalance)||0;
   const rows = sorted.map(e=>{
     running += (e.type!=="Expense" ? Number(e.amount) : -Number(e.amount));
     return {...e, bal: running};
   });
-  body.innerHTML = rows.slice().reverse().map(e=>`
+  const hm=document.getElementById("hMonth"), hs=document.getElementById("hSearch");
+  const mlist=[...new Set(entries.map(e=>monthKey(e.date)))].sort().reverse(), hprev=hm.value;
+  hm.innerHTML='<option value="">All months</option>'+mlist.map(m=>`<option value="${m}">${monthLabel(m)}</option>`).join("");
+  hm.value=mlist.includes(hprev)?hprev:"";
+  const q=hs.value.trim().toLowerCase();
+  const view=rows.slice().reverse().filter(e=>(!hm.value||monthKey(e.date)===hm.value)&&(!q||((e.note||"")+" "+e.category+" "+e.type).toLowerCase().includes(q)));
+  if(!view.length){ body.innerHTML=`<tr><td colspan="7" class="empty-note">No entries match.</td></tr>`; return; }
+  body.innerHTML = view.map(e=>`
     <tr>
-      <td>${new Date(e.date).toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</td>
+      <td>${new Date(e.date+"T00:00:00").toLocaleDateString("en-IN",{day:"2-digit",month:"short",year:"numeric"})}</td>
       <td><span class="tag ${isSaving(e)?'Saving':e.type}">${isSaving(e)?'Saving':e.type}</span></td>
-      <td>${e.category}</td>
-      <td>${e.note ? e.note : "—"}</td>
+      <td>${escHtml(e.category)}</td>
+      <td>${e.note ? escHtml(e.note) : "—"}</td>
       <td class="amt ${e.type!=='Expense'?'pos':'neg'}">${e.type!=='Expense'?'+':'-'}${fmt(e.amount)}</td>
       <td class="amt">${fmt(e.bal)}</td>
-      <td><button class="del-btn" title="Delete" onclick="deleteEntry('${e.id}')">✕</button></td>
+      <td style="white-space:nowrap;"><button class="del-btn" title="Edit" onclick="editEntry('${escHtml(e.id)}')">✎</button><button class="del-btn" title="Delete" onclick="deleteEntry('${escHtml(e.id)}')">✕</button></td>
     </tr>`).join("");
 }
 
 function renderCategories(){
   const m = currentMonth();
+  renderIncomeCats(m);
   document.getElementById("catMonthLabel").textContent = monthLabel(m);
   const data = categoryBreakdown(m);
   renderPie("catPie","catLegend", data);
@@ -926,7 +951,7 @@ function renderCategories(){
     return;
   }
   body.innerHTML = data.map(([k,v])=>`
-    <tr><td>${k}</td><td class="amt">${fmt(v)}</td><td class="amt">${(v/total*100).toFixed(1)}%</td></tr>`).join("")
+    <tr><td>${escHtml(k)}</td><td class="amt">${fmt(v)}</td><td class="amt">${(v/total*100).toFixed(1)}%</td></tr>`).join("")
     + `<tr><td><strong>Total</strong></td><td class="amt"><strong>${fmt(total)}</strong></td><td class="amt"><strong>100%</strong></td></tr>`;
 }
 
@@ -936,12 +961,12 @@ function renderGoals(){
     const pct = g.target>0 ? Math.min(1, g.current/g.target) : 0;
     return `
     <div class="goal">
-      <div class="goal-head"><span class="name">${g.name}</span><span class="pct">${(pct*100).toFixed(1)}%</span></div>
+      <div class="goal-head"><span class="name">${escHtml(g.name)}</span><span class="pct">${(pct*100).toFixed(1)}%</span></div>
       <div class="gauge"><div class="gauge-fill" style="width:${pct*100}%"></div></div>
       <div class="goal-meta"><span>Saved: ${fmt(g.current)}</span><span>Target: ${fmt(g.target)}</span><span>Remaining: ${fmt(Math.max(0,g.target-g.current))}</span></div>
-      <div class="goal-edit">
+      <div class="goal-edit"><div class="field"><label>Name</label><input type="text" value="${escHtml(g.name)}" onchange="renameGoal(${i},this)"></div>
         <div class="field"><label>Target (₹)</label><input type="number" value="${g.target}" onchange="updateGoal(${i},'target',this.value)"></div>
-        <div class="field"><label>Current Saved (₹)</label><input type="number" value="${g.current}" onchange="updateGoal(${i},'current',this.value)"></div>
+        <div class="field"><label>Current Saved (₹)</label><input type="number" value="${g.current}" onchange="updateGoal(${i},'current',this.value)"></div><button class="del-btn" title="Delete goal" onclick="deleteGoal(${i})">✕</button>
       </div>
     </div>`;
   }).join("");
@@ -956,13 +981,17 @@ function updateGoal(i, field, val){
 
 function renderLoans(){
   const list = document.getElementById("loansList");
-  list.innerHTML = settings.loans.map((l,i)=>`
-    <div class="loan-row">
-      <div class="field"><label>Loan name</label><input type="text" value="${l.name}" onchange="updateLoan(${i},'name',this.value)"><div style="font-size:11px;color:var(--ink-soft);margin-top:3px;">Log payments as: ${l.category}</div></div>
+  list.innerHTML = settings.loans.map((l,i)=>{
+    const m=currentMonth(), left=Number(l.monthsLeft)>0;
+    const paid=entries.some(e=>e.type==="Expense"&&e.category===l.category&&monthKey(e.date)===m);
+    const badge=left?(paid?'<b style="color:var(--forest)">✓ Paid for '+monthLabel(m)+'</b>':'<b style="color:var(--oxblood)">Due — not logged for '+monthLabel(m)+'</b>'):'<b>Cleared</b>';
+    return `<div class="loan-row">
+      <div class="field"><label>Loan name</label><input type="text" value="${escHtml(l.name)}" onchange="updateLoan(${i},'name',this.value)"><div style="font-size:11px;color:var(--ink-soft);margin-top:3px;">Log payments as: ${escHtml(l.category)}<br>${badge}</div></div>
       <div class="field"><label>Monthly EMI (₹)</label><input type="number" value="${l.emi}" onchange="updateLoan(${i},'emi',this.value)"></div>
       <div class="field"><label>Months left</label><input type="number" value="${l.monthsLeft}" onchange="updateLoan(${i},'monthsLeft',this.value)"></div>
+      <div class="field"><label>Principal left (optional)</label><input type="number" value="${l.principal||""}" onchange="updateLoan(${i},'principal',this.value)"></div>
       <button class="del-btn" title="Remove loan" onclick="removeLoan(${i})">✕</button>
-    </div>`).join("");
+    </div>`; }).join("");
   const total = settings.loans.filter(l=>Number(l.monthsLeft)>0).reduce((s,l)=>s+Number(l.emi),0);
   document.getElementById("totalEmi").textContent = fmt(total);
   document.getElementById("openingBalanceInput").value = settings.openingBalance;
@@ -981,6 +1010,7 @@ function removeLoan(i){
 }
 
 function deleteEntry(id){
+  if(!confirm("Delete this entry? This cannot be undone.")) return;
   const d = entries.find(x=>x.id===id);
   if(d){
     undoGoal(d);
@@ -1005,7 +1035,7 @@ document.querySelectorAll("nav.tabs button").forEach(btn=>{
 });
 
 document.getElementById("fType").addEventListener("change", populateCategorySelect);
-document.getElementById("monthSelect").addEventListener("change", ()=>{ renderDashboard(); renderCategories(); });
+document.getElementById("monthSelect").addEventListener("change", ()=>{ renderDashboard(); renderCategories(); renderLoans(); });
 
 document.getElementById("entryForm").addEventListener("submit", (ev)=>{
   ev.preventDefault();
@@ -1016,16 +1046,7 @@ document.getElementById("entryForm").addEventListener("submit", (ev)=>{
   const note = document.getElementById("fNote").value.trim();
   if(!amount || amount<=0){ return; }
   const goal = document.getElementById("goalField").style.display==="none" ? "" : document.getElementById("fGoal").value;
-  const g = settings.goals.find(x=>x.name===goal);
-  if(type==="Withdrawal" && g && amount>(Number(g.current)||0) && !confirm(g.name+" only has "+fmt(g.current)+" saved. Withdraw anyway?")) return;
-  const entry = {id:uid(), date, type, category, amount, note, goal, createdAt:Date.now()};
-  applyGoal(entry);
-  if(type==="Expense"){
-    const l = settings.loans.find(l=>l.category===category);
-    if(l && Number(l.monthsLeft)>0){ l.monthsLeft = Number(l.monthsLeft)-1; entry.emiCounted = true; saveSettings(); }
-  }
-  entries.push(entry);
-  saveEntries();
+  if(!saveEntryData({date,type,category,amount,note,goal})) return;
   document.getElementById("entryForm").reset();
   document.getElementById("fDate").value = todayStr();
   populateCategorySelect();
@@ -1089,7 +1110,7 @@ function removeCat(name){
   saveSettings();
   populateCategorySelect(); renderCustomList(); renderDashboard(); renderCategories();
 }
-$("addCatBtn").addEventListener("click", openCatModal);
+$("addCatBtn").addEventListener("click", ()=>{ _catTab=$("fType").value; openSheet("Edit Categories",catsSheetHtml()); });
 $("mCancel").addEventListener("click", closeCatModal);
 $("mSave").addEventListener("click", saveCat);
 $("mName").addEventListener("keydown", ev=>{ if(ev.key==="Enter"){ ev.preventDefault(); saveCat(); } });
@@ -1144,8 +1165,9 @@ async function shareBackup(){ try{
 function restoreFromFile(file){
   var r=new FileReader();
   r.onload=function(){ try{
-    var d=JSON.parse(r.result); if(!d||!Array.isArray(d.entries)||typeof d.settings!=="object") throw 0;
-    if(!confirm("Replace the ledger on this device with this backup ("+d.entries.length+" entries)?")) return;
+    var d=JSON.parse(r.result); if(!d||!Array.isArray(d.entries)||!d.settings||typeof d.settings!=="object") throw 0;
+    var good=cleanEntries(d.entries), bad=d.entries.length-good.length; d.entries=good;
+    if(!confirm("Replace the ledger on this device with this backup ("+d.entries.length+" entries"+(bad?", "+bad+" invalid skipped":"")+")?")) return;
     applyData(d.entries,d.settings); closeSheet(); showToast("Ledger restored");
   }catch(e){ alert("That file is not a Household Ledger backup."); } };
   r.readAsText(file);
@@ -1212,19 +1234,19 @@ function openWorthSheet(){
   var goals=settings.goals.reduce(function(s,g){ return s+(Number(g.current)||0); },0);
   var other=0; entries.forEach(function(e){ if(e.goal) return; if(isSaving(e)) other+=Number(e.amount)||0; else if(e.type==="Withdrawal") other-=Number(e.amount)||0; });
   other=Math.max(0,other);
-  var owed=settings.loans.reduce(function(s,l){ var m=Number(l.monthsLeft)||0; return s+(m>0?(Number(l.emi)||0)*m:0); },0);
+  var owed=settings.loans.reduce(function(s,l){ var m=Number(l.monthsLeft)||0; if(m<=0) return s; var p=Number(l.principal)||0; return s+(p>0?p:(Number(l.emi)||0)*m); },0);
   var worth=bal+goals+other-owed, row=function(a,b,c){ return '<div class="worth-row"><span>'+a+'</span><span'+(c?' style="color:'+c+'"':'')+'>'+b+'</span></div>'; };
   openSheet("Net Worth",
    '<p class="sheet-note">What you own, less what you still owe.</p>'+
    row("Cash balance",fmt(bal))+row("Savings in goals",fmt(goals))+row("Other logged savings",fmt(other))+
    row("Remaining loan payments","− "+fmt(owed),"var(--oxblood)")+
    '<div class="worth-row total"><span>Net worth</span><span style="color:'+(worth<0?'var(--oxblood)':'var(--forest)')+'">'+fmt(worth)+'</span></div>'+
-   '<p class="sheet-meta">Remaining loan payments = EMI × months left, as entered on the Loans page.</p>');
+   '<p class="sheet-meta">Loans use the outstanding principal if you entered it on the Loans page; otherwise EMI × months left (an estimate that includes future interest).</p>');
 }
 function openTermsSheet(){
   openSheet("Terms & Conditions",'<div class="terms">'+
    '<p><b>1. Purpose.</b> The Household Ledger is a personal record-keeping tool. It is not financial, tax or legal advice.</p>'+
-   '<p><b>2. Your data stays with you.</b> Everything you enter is stored on this device, in this browser. Nothing is uploaded, shared or sent to any server, and no account is needed.</p>'+
+   '<p><b>2. Your data stays with you.</b> Everything you enter is stored on this device, in this browser. Your entries are never uploaded or shared, and no account is needed. (Only the decorative fonts are fetched from Google Fonts.)</p>'+
    '<p><b>3. Backups are your responsibility.</b> Clearing browser data, switching browser or phone, or a device fault can erase your ledger. Use Backup &amp; Restore regularly.</p>'+
    '<p><b>4. Accuracy.</b> All figures, including net worth, are calculated only from what you enter and are estimates. Check loan details with your lender.</p>'+
    '<p><b>5. No warranty.</b> The app is provided as is, without warranty of any kind. The creator is not liable for any loss arising from its use.</p>'+
@@ -1238,6 +1260,80 @@ $("menuPanel").addEventListener("click",function(ev){ var b=ev.target.closest("b
 $("sheetClose").addEventListener("click",closeSheet);
 $("sheet").addEventListener("click",function(ev){ if(ev.target.id==="sheet") closeSheet(); });
 $("restoreFile").addEventListener("change",function(ev){ var f=ev.target.files&&ev.target.files[0]; if(f) restoreFromFile(f); ev.target.value=""; });
+
+/* ---------- v3 additions ---------- */
+function cleanEntries(a){ return a.filter(e=>e&&/^\d{4}-\d{2}-\d{2}$/.test(e.date)&&["Income","Expense","Withdrawal"].includes(e.type)&&Number(e.amount)>0).map((e,i)=>({...e,id:String(e.id||uid()+i),amount:Number(e.amount),category:String(e.category||"Other"),note:String(e.note||""),createdAt:Number(e.createdAt)||(Date.parse(e.date)+i)})); }
+function poolBal(){ let p=0; entries.forEach(e=>{ if(e.goal) return; if(isSaving(e)) p+=Number(e.amount)||0; else if(e.type==="Withdrawal") p-=Number(e.amount)||0; }); return p; }
+function saveEntryData(o, replaceId){
+  const snap=JSON.stringify({entries:entries,goals:settings.goals,loans:settings.loans});
+  const undo=()=>{ const S=JSON.parse(snap); entries=S.entries; settings.goals=S.goals; settings.loans=S.loans; saveSettings(); };
+  let old=null;
+  if(replaceId){
+    const idx=entries.findIndex(x=>x.id===replaceId);
+    if(idx>=0){ old=entries[idx]; undoGoal(old);
+      if(old.emiCounted){ const l0=settings.loans.find(l=>l.category===old.category); if(l0) l0.monthsLeft=(Number(l0.monthsLeft)||0)+1; }
+      entries.splice(idx,1); }
+  }
+  const amount=Math.round(Number(o.amount)*100)/100;
+  const g=settings.goals.find(x=>x.name===o.goal);
+  if(o.type==="Withdrawal"){
+    const avail=g?(Number(g.current)||0):poolBal();
+    if(amount>avail+0.001){ undo(); alert("Only "+fmt(avail)+" is available in "+(g?g.name:"General savings")+". Add savings first or choose another source."); return false; }
+  }
+  const entry={id:old?old.id:uid(), date:o.date, type:o.type, category:o.category, amount, note:o.note, goal:o.goal, createdAt:old?old.createdAt:Date.now()};
+  applyGoal(entry);
+  if(o.type==="Expense"){
+    const l=settings.loans.find(l=>l.category===o.category);
+    if(l && Number(l.monthsLeft)>0 && !entries.some(x=>x.emiCounted&&x.category===o.category&&monthKey(x.date)===monthKey(o.date))){ l.monthsLeft=Number(l.monthsLeft)-1; entry.emiCounted=true; }
+  }
+  entries.push(entry); saveEntries(); saveSettings(); return true;
+}
+var _eid=null;
+function editCatOpts(sel){ var l=catList($("eType").value); if(sel&&l.indexOf(sel)<0) l=[sel].concat(l); $("eCat").innerHTML=l.map(c=>`<option value="${escHtml(c)}"${c===sel?" selected":""}>${escHtml(c)}</option>`).join(""); }
+function editEntry(id){
+  var e=entries.find(x=>x.id===id); if(!e) return; _eid=id;
+  var ty=["Income","Expense","Withdrawal"].map(t=>`<option${t===e.type?" selected":""}>${t}</option>`).join("");
+  var gl='<option value="">General savings / none</option>'+settings.goals.map(g=>`<option value="${escHtml(g.name)}"${g.name===e.goal?" selected":""}>${escHtml(g.name)}</option>`).join("");
+  openSheet("Edit Entry",'<div class="field"><label>Date</label><input type="date" id="eDate" value="'+e.date+'"></div>'+
+   '<div class="field" style="margin-top:10px;"><label>Type</label><select id="eType" onchange="editCatOpts()">'+ty+'</select></div>'+
+   '<div class="field" style="margin-top:10px;"><label>Category</label><select id="eCat"></select></div>'+
+   '<div class="field" style="margin-top:10px;"><label>Goal (savings only)</label><select id="eGoal">'+gl+'</select></div>'+
+   '<div class="field" style="margin-top:10px;"><label>Amount (₹)</label><input type="number" id="eAmt" min="0" step="0.01" value="'+e.amount+'"></div>'+
+   '<div class="field" style="margin-top:10px;"><label>Note</label><input type="text" id="eNote" value="'+escHtml(e.note||"")+'"></div>'+
+   '<div class="sheet-actions"><button class="btn" type="button" onclick="saveEdit()">Save changes</button></div>');
+  editCatOpts(e.category);
+}
+function saveEdit(){
+  var type=$("eType").value, cat=$("eCat").value, amount=Number($("eAmt").value), date=$("eDate").value;
+  if(!date||!(amount>0)){ alert("Enter a valid date and amount."); return; }
+  var goal=$("eGoal").value; if(!(type==="Withdrawal"||(type==="Expense"&&cat===SAVINGS_CAT))) goal="";
+  if(saveEntryData({date:date,type:type,category:cat,amount:amount,note:$("eNote").value.trim(),goal:goal},_eid)){ closeSheet(); renderAll(); showToast("Entry updated"); }
+}
+function addGoal(){ var n="New Goal",k=1; while(settings.goals.some(g=>g.name===n)) n="New Goal "+(++k); settings.goals.push({name:n,target:0,current:0}); saveSettings(); renderGoals(); updateGoalField(); }
+function renameGoal(i,inp){
+  var old=settings.goals[i].name, nn=cleanName(inp.value);
+  if(!nn||nn===old){ inp.value=old; return; }
+  if(settings.goals.some((g,j)=>j!==i&&g.name.toLowerCase()===nn.toLowerCase())){ alert("A goal with that name already exists."); inp.value=old; return; }
+  settings.goals[i].name=nn; entries.forEach(e=>{ if(e.goal===old) e.goal=nn; });
+  saveEntries(); saveSettings(); renderGoals(); updateGoalField();
+}
+function deleteGoal(i){
+  var g=settings.goals[i];
+  if(!confirm('Delete goal "'+g.name+'"? Its entries stay in the ledger and move to General savings.')) return;
+  entries.forEach(e=>{ if(e.goal===g.name) e.goal=""; });
+  settings.goals.splice(i,1); saveEntries(); saveSettings(); renderGoals(); updateGoalField();
+}
+function renderIncomeCats(m){
+  document.getElementById("incMonthLabel").textContent=monthLabel(m);
+  var t={}; entries.filter(e=>monthKey(e.date)===m&&e.type==="Income").forEach(e=>{ t[e.category]=(t[e.category]||0)+Number(e.amount); });
+  var data=Object.entries(t).filter(([k,v])=>v>0).sort((a,b)=>b[1]-a[1]);
+  renderPie("incPie","incLegend",data,"No income logged for this month yet.");
+  var total=data.reduce((s,[k,v])=>s+v,0), body=document.getElementById("incBody");
+  body.innerHTML=data.length?data.map(([k,v])=>`<tr><td>${escHtml(k)}</td><td class="amt">${fmt(v)}</td><td class="amt">${(v/total*100).toFixed(1)}%</td></tr>`).join("")+`<tr><td><strong>Total</strong></td><td class="amt"><strong>${fmt(total)}</strong></td><td class="amt"><strong>100%</strong></td></tr>`:`<tr><td colspan="3" class="empty-note">No income logged for this month.</td></tr>`;
+}
+document.getElementById("addGoalBtn").addEventListener("click",addGoal);
+document.getElementById("hMonth").addEventListener("change",renderHistory);
+document.getElementById("hSearch").addEventListener("input",renderHistory);
 
 /* ---------- init ---------- */
 load(); migrateCats(); try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){} if(entries.length) mirrorWrite();
