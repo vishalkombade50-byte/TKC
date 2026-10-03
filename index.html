@@ -502,6 +502,68 @@ header.masthead{ position:relative; }
 .terms p{ font-size:15px; margin:0 0 10px; }
 .loan-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end;}
 .goal-edit{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;align-items:end;}
+
+/* ---- sealed letter v2 ---- */
+html,body{ overflow-x:clip; max-width:100%; }
+.envelope{ position:relative; display:flow-root; margin-top:18px; perspective:1100px; overflow:hidden; contain:paint; -webkit-tap-highlight-color:transparent; }
+.envelope > .hero.textured{ margin-top:0; transform:scale(.96); filter:brightness(.8); transition:transform 1.1s cubic-bezier(.2,.9,.2,1) .3s, filter 1.1s ease .3s; }
+.envelope.open > .hero.textured{ transform:none; filter:none; cursor:pointer; }
+.hero .reseal{ font-family:'Cinzel',serif; font-size:10px; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-soft); opacity:.7; margin-top:10px; }
+.env-flap{ position:absolute; inset:0; pointer-events:none; filter:drop-shadow(0 4px 6px rgba(50,20,5,.38));
+  transition:transform 1s cubic-bezier(.5,.05,.3,1) var(--d), opacity .25s ease var(--d); }
+.env-flap .fp{ position:absolute; inset:0; background-color:#f0e4c8; background-image:var(--lt), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.32  0 0 0 0 0.21  0 0 0 0 0.10  1.5 0 0 0 -0.52'/></filter><rect width='100%25' height='100%25' filter='url(%23g)'/></svg>"), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='0.012 0.55' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.40  0 0 0 0 0.28  0 0 0 0 0.14  0 1.6 0 0 -0.72'/></filter><rect width='100%25' height='100%25' filter='url(%23f)'/></svg>"), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='k'><feTurbulence type='fractalNoise' baseFrequency='0.5' numOctaves='2' seed='19' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.30  0 0 0 0 0.20  0 0 0 0 0.10  0 9 0 0 -6.5'/></filter><rect width='100%25' height='100%25' filter='url(%23k)'/></svg>"), url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='400' height='400'><filter id='m'><feTurbulence type='fractalNoise' baseFrequency='0.006' numOctaves='3' seed='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.55  0 0 0 0 0.38  0 0 0 0 0.16  0 0 1.2 0 -0.42'/></filter><rect width='100%25' height='100%25' filter='url(%23m)'/></svg>");
+  background-size:100% 100%, 180px 180px, 320px 320px, 260px 260px, 400px 400px; box-shadow:inset 0 0 0 1px rgba(110,70,25,.35), inset 0 0 22px rgba(130,85,30,.22); }
+.env-flap.l{ z-index:3; --d:0s;   --o:.52s; transform-origin:0 50%; } .env-flap.l .fp{ clip-path:polygon(0 0,55% 50%,0 100%); --lt:linear-gradient(100deg,rgba(255,255,255,.28),rgba(110,70,25,.22)); }
+.env-flap.r{ z-index:3; --d:0s;   --o:.52s; transform-origin:100% 50%; } .env-flap.r .fp{ clip-path:polygon(100% 0,100% 100%,45% 50%); --lt:linear-gradient(260deg,rgba(150,100,40,.10),rgba(70,40,15,.30)); }
+.env-flap.b{ z-index:4; --d:.14s; --o:.42s; transform-origin:50% 100%; } .env-flap.b .fp{ clip-path:polygon(0 100%,100% 100%,50% 44%); --lt:linear-gradient(0deg,rgba(255,255,255,.10),rgba(90,55,20,.30)); }
+.env-flap.t{ z-index:5; --d:.28s; --o:.3s;  transform-origin:50% 0; } .env-flap.t .fp{ clip-path:polygon(0 0,100% 0,50% 60%); --lt:linear-gradient(180deg,rgba(255,255,255,.40),rgba(120,80,30,.16)); }
+.envelope.open .env-flap{ opacity:0; transition:transform 1.05s cubic-bezier(.25,.75,.25,1) var(--o), opacity .5s ease calc(var(--o) + .45s); }
+.envelope.open .env-flap.t{ transform:rotateX(-122deg); } .envelope.open .env-flap.b{ transform:rotateX(122deg); }
+.envelope.open .env-flap.l{ transform:rotateY(122deg); } .envelope.open .env-flap.r{ transform:rotateY(-122deg); }
+.env-cap{ position:absolute; left:0; right:0; bottom:12px; text-align:center; z-index:6; pointer-events:none; font-family:'Cinzel',serif; font-size:10px; letter-spacing:.22em; text-transform:uppercase; color:#6b4a3a; text-shadow:0 1px 0 rgba(255,255,255,.55); transition:opacity .3s ease .8s; }
+.envelope.open .env-cap{ opacity:0; transition-delay:0s; transition-duration:.2s; }
+.wax{ position:absolute; left:50%; top:50%; width:96px; height:97px; margin:-48px 0 0 -48px; z-index:7; border:0; padding:0; background:none; cursor:pointer;
+  filter:drop-shadow(0 7px 8px rgba(60,4,12,.5)); -webkit-tap-highlight-color:transparent; transition:scale .25s cubic-bezier(.3,1.5,.5,1); animation:breathe 3.4s ease-in-out infinite; }
+@keyframes breathe{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.045); } }
+.wax:hover{ scale:1.07; } .wax:active{ scale:.94; }
+.wax:focus-visible{ outline:2px solid var(--brass-bright); outline-offset:6px; border-radius:50%; }
+.wax .h{ position:absolute; inset:0; background:var(--seal) center/contain no-repeat; transition:transform .6s cubic-bezier(.2,1.5,.4,1) .85s, opacity .3s ease .85s; }
+.wax .h.l{ clip-path:polygon(0 0,53% 0,46% 17%,55% 35%,45% 54%,54% 74%,47% 100%,0 100%); }
+.wax .h.r{ clip-path:polygon(53% 0,100% 0,100% 100%,47% 100%,54% 74%,45% 54%,55% 35%,46% 17%); }
+.envelope.open .wax{ pointer-events:none; animation:none; }
+.envelope.open .wax .h{ transition:transform .7s cubic-bezier(.5,0,.8,.6), opacity .4s ease .2s; opacity:0; }
+.envelope.open .wax .h.l{ transform:translate(-44px,24px) rotate(-30deg); }
+.envelope.open .wax .h.r{ transform:translate(44px,28px) rotate(32deg); }
+.fx{ position:absolute; left:50%; top:50%; width:0; height:0; z-index:9; pointer-events:none; }
+.fx i{ position:absolute; left:0; top:0; display:block; opacity:0; }
+.fx .gl{ width:340px; height:340px; margin:-170px 0 0 -170px; border-radius:50%; background:radial-gradient(circle,rgba(255,228,150,.7),rgba(255,228,150,0) 65%); }
+.fx .pf{ width:78px; height:78px; margin:-39px 0 0 -39px; border-radius:50%; filter:blur(1.5px); background:radial-gradient(circle,rgba(255,250,236,.96),rgba(236,218,178,.55) 45%,rgba(236,218,178,0) 70%); }
+.fx .cr{ width:9px; height:9px; margin:-4px 0 0 -4px; border-radius:30% 60% 40% 55%; background:radial-gradient(circle at 30% 30%,#c42a45,#7a0c20); }
+.fx .sp{ width:4px; height:4px; margin:-2px 0 0 -2px; border-radius:50%; background:#f6d97c; box-shadow:0 0 7px 2px rgba(246,217,124,.85); }
+.fx.go .gl{ animation:fxgl 1.5s ease-out both; }
+.fx.go .pf{ animation:fxpf 1.3s cubic-bezier(.2,.7,.3,1) both; }
+.fx.go .cr{ animation:fxcr 1.1s cubic-bezier(.3,.2,.6,1) both; }
+.fx.go .sp{ animation:fxsp 1.2s ease-out both; }
+@keyframes fxgl{ 0%{ opacity:0; transform:scale(.4); } 30%{ opacity:1; } 100%{ opacity:0; transform:scale(1.5); } }
+@keyframes fxpf{ 0%{ opacity:0; transform:translate(0,0) scale(.3); } 18%{ opacity:.9; } 100%{ opacity:0; transform:translate(var(--x),var(--y)) scale(var(--s)); } }
+@keyframes fxcr{ 0%{ opacity:1; transform:translate(0,0) rotate(0); } 100%{ opacity:0; transform:translate(var(--x),var(--y)) rotate(var(--r)); } }
+@keyframes fxsp{ 0%{ opacity:0; transform:translate(0,0) scale(.4); } 20%{ opacity:1; } 100%{ opacity:0; transform:translate(var(--x),var(--y)) scale(1); } }
+@media (prefers-reduced-motion: reduce){ .env-flap, .wax .h, .env-cap, .envelope > .hero.textured{ transition-duration:.01s !important; transition-delay:0s !important; } .wax{ animation:none; } .fx{ display:none; } }
+/* ---- lending ---- */
+a.btn{ text-decoration:none; display:inline-block; text-align:center; }
+.badge{ font-family:'Cinzel',serif; font-size:10px; letter-spacing:.12em; text-transform:uppercase; padding:2px 7px; border:1px solid currentColor; margin-left:6px; }
+.loan-card{ border:1px solid var(--brass); outline:1px solid var(--paper-line); outline-offset:-5px; padding:14px 14px 10px; margin-bottom:14px; background:var(--card-bg); }
+.loan-top{ display:flex; gap:10px; align-items:flex-end; }
+.loan-top .field{ flex:1; min-width:0; }
+.kind-chip{ display:inline-block; font-family:'Cinzel',serif; font-size:10px; letter-spacing:.14em; text-transform:uppercase; color:var(--crimson); border:1px solid var(--brass); padding:2px 7px; margin-bottom:6px; }
+.lbar{ height:9px; background:var(--paper-shadow); border:1px solid var(--paper-line); margin:10px 0 4px; }
+.lbar i{ display:block; height:100%; background:linear-gradient(90deg,var(--brass),var(--forest)); }
+.lmeta{ font-size:13px; color:var(--ink-soft); margin:2px 0; }
+.lact{ display:flex; gap:8px; margin-top:8px; flex-wrap:wrap; }
+.due-strip{ border:1.5px solid var(--oxblood); background:var(--card-bg); padding:10px 14px; margin-top:16px; }
+.due-strip h3{ margin:0 0 6px; color:var(--oxblood); }
+.due-row{ display:flex; justify-content:space-between; gap:10px; padding:4px 0; border-top:1px solid var(--paper-line); font-size:15px; }
+.due-row:first-of-type{ border-top:none; }
 </style>
 </head>
 <body>
@@ -532,17 +594,27 @@ header.masthead{ position:relative; }
     <button data-page="categories">Categories</button>
     <button data-page="goals">Goals</button>
     <button data-page="loans">Loans</button>
+    <button data-page="lending">Lending</button>
   </nav>
 
   <main>
 
     <!-- DASHBOARD -->
     <section class="page active" id="page-dashboard">
-      <div class="hero textured">
-        <div class="label">Current Balance, All Time</div>
-        <div class="amount" id="heroBalance">₹0</div>
-        <div class="note">Opening balance <span id="heroOpening">₹0</span> plus every entry logged since.</div>
+      <div class="envelope" id="envelope">
+        <div class="hero textured" id="heroCard" aria-hidden="true" tabindex="-1">
+          <div class="label">Current Balance, All Time</div>
+          <div class="amount" id="heroBalance">₹0</div>
+          <div class="note">Opening balance <span id="heroOpening">₹0</span> plus every entry logged since.</div>
+          <div class="reseal">tap to seal again</div>
+        </div>
+        <div class="env-flap l"><div class="fp"></div></div><div class="env-flap r"><div class="fp"></div></div><div class="env-flap b"><div class="fp"></div></div><div class="env-flap t"><div class="fp"></div></div>
+        <div class="env-cap">Private · tap the seal</div>
+        <button class="wax" id="waxSeal" type="button" aria-label="Break the seal to reveal your balance"><span class="h l"></span><span class="h r"></span></button>
+        <div class="fx" id="envFx" aria-hidden="true"></div>
       </div>
+
+      <div id="dueStrip"></div>
 
       <div class="grid">
         <div class="stat income"><div class="stat-label">Income this month</div><div class="stat-value" id="statIncome">₹0</div></div>
@@ -646,11 +718,22 @@ header.masthead{ position:relative; }
     </section>
 
     <!-- LOANS -->
+    <!-- LENDING -->
+    <section class="page" id="page-lending">
+      <div class="card textured">
+        <h2>Money Lent</h2>
+        <div class="grid" id="lendStats"></div>
+        <div class="field" style="margin-top:14px;"><input type="search" id="lendSearch" placeholder="Search by name, phone or place"></div>
+        <div id="lendList" style="margin-top:14px;"></div>
+        <button class="btn small" id="addLendBtn" type="button">+ Lend money</button>
+      </div>
+    </section>
+
     <section class="page" id="page-loans">
       <div class="card textured">
         <h2>Loans &amp; EMIs</h2>
         <div id="loansList"></div>
-        <button class="btn small" id="addLoanBtn" type="button" style="margin-top:6px;">+ Add another loan</button>
+        <button class="btn small" id="addLoanBtn" type="button" style="margin-top:6px;">+ Add loan / credit card</button>
         <hr class="rule double">
         <div class="stat" style="border-left-color:var(--navy); max-width:260px;">
           <div class="stat-label">Total Monthly EMI Commitment</div>
@@ -782,6 +865,7 @@ function populateCategorySelect(){
   updateGoalField();
 }
 function updateGoalField(){
+  if(window.updateSrcField) updateSrcField();
   const type = document.getElementById("fType").value;
   const cat = document.getElementById("fCategory").value;
   const show = type==="Withdrawal" || (type==="Expense" && cat==="Savings/Investment");
@@ -815,14 +899,14 @@ function renderAll(){
 
 const SAVINGS_CAT = "Savings/Investment";
 function isSaving(e){ return e.type==="Expense" && e.category===SAVINGS_CAT; }
-function isEmi(e){ return e.type==="Expense" && !!e.category && (e.category.indexOf("EMI")===0 || settings.loans.some(l=>l.category===e.category)); }
+function isEmi(e){ return e.type==="Expense" && !!e.category && (e.category.indexOf("EMI")===0 || settings.loans.some(l=>l.category===e.category&&l.mode!=="bill")); }
 function monthTotals(m){
   let income=0, expense=0, emi=0, saved=0, withdrawn=0;
   entries.filter(e=>monthKey(e.date)===m).forEach(e=>{
     const a = Number(e.amount)||0;
-    if(e.type==="Income") income += a;
+    if(e.type==="Income"){ if(!e.loanRecv&&!e.lendFlow) income += a; }
     else if(e.type==="Withdrawal") withdrawn += a;
-    else if(isSaving(e)) saved += a;
+    else if(e.lendFlow){} else if(isSaving(e)) saved += a;
     else{ expense += a; if(isEmi(e)) emi += a; }
   });
   return {income, expense, emi, saved, withdrawn, net: income-expense, cash: income+withdrawn-expense-saved};
@@ -1002,20 +1086,26 @@ function updateLoan(i, field, val){
   renderDashboard();
 }
 function removeLoan(i){
-  settings.loans.splice(i,1);
-  saveSettings();
-  renderLoans();
-  renderDashboard();
+  var l=settings.loans[i], has=entries.some(function(e){ return e.loanId===l.id; });
+  openSheet("Remove "+escHtml(l.name),'<p class="sheet-note">Choose what happens to the '+fmt(l.received||0)+' that was added to your balance.</p><div class="sheet-actions"><button class="btn" type="button" onclick="doRemoveLoan('+i+',false)">Remove loan, keep money in balance</button>'+(has?'<button class="btn" type="button" onclick="doRemoveLoan('+i+',true)">Remove loan and take money out of balance</button>':'')+'</div>');
 }
-
-function deleteEntry(id){
-  if(!confirm("Delete this entry? This cannot be undone.")) return;
+function doRemoveLoan(i,take){
+  var l=settings.loans[i]; if(take) entries=entries.filter(function(e){ return e.loanId!==l.id; });
+  settings.loans.splice(i,1); saveEntries(); saveSettings(); closeSheet(); renderAll();
+}
+function deleteEntry(id){ askYes("Delete this entry? This cannot be undone.","Delete entry",function(){ doDeleteEntry(id); }); }
+function askYes(msg,label,fn){ window._yes=fn; openSheet("Please confirm",'<p class="sheet-note">'+msg+'</p><div class="sheet-actions"><button class="btn" type="button" onclick="var f=window._yes;closeSheet();if(f)f()">'+label+'</button></div>'); }
+function doDeleteEntry(id){
   const d = entries.find(x=>x.id===id);
   if(d){
     undoGoal(d);
+    if(d.lendPay){ var ld=lends().find(function(x){ return x.id===d.lendId; }); if(ld) ld.pays=(ld.pays||[]).filter(function(p){ return p.id!==d.lendPay; }); saveSettings(); }
+    if(d.lendOut){ settings.lends=lends().filter(function(x){ return x.id!==d.lendId; }); entries=entries.filter(function(e){ return e.lendId!==d.lendId||e.id===id; }); saveSettings(); }
+    if(d.loanRecv){ var rl=settings.loans.find(function(x){ return x.id===d.loanId; }); if(rl){ rl.received=0; saveSettings(); } }
+    if(d.prevMonths!==undefined){ var pl=settings.loans.find(function(x){ return x.id===d.payLoan; }); if(pl){ pl.monthsLeft=d.prevMonths; pl.principal=d.prevPrincipal; saveSettings(); } }
     if(d.emiCounted){
       const l = settings.loans.find(l=>l.category===d.category);
-      if(l){ l.monthsLeft = (Number(l.monthsLeft)||0) + 1; saveSettings(); }
+      if(l){ l.monthsLeft = (Number(l.monthsLeft)||0) + 1; if(d.prinDelta) l.principal=(Number(l.principal)||0)+d.prinDelta; saveSettings(); }
     }
   }
   entries = entries.filter(e=>e.id!==id);
@@ -1055,6 +1145,7 @@ document.getElementById("entryForm").addEventListener("submit", (ev)=>{
 });
 
 document.getElementById("addLoanBtn").addEventListener("click", ()=>{
+  if(window.openLoanSheet) return openLoanSheet();
   let n = settings.loans.length + 1;
   while(catList("Expense").includes("EMI - New Loan "+n)) n++;
   const cname = "EMI - New Loan "+n;
@@ -1271,7 +1362,7 @@ function saveEntryData(o, replaceId){
   if(replaceId){
     const idx=entries.findIndex(x=>x.id===replaceId);
     if(idx>=0){ old=entries[idx]; undoGoal(old);
-      if(old.emiCounted){ const l0=settings.loans.find(l=>l.category===old.category); if(l0) l0.monthsLeft=(Number(l0.monthsLeft)||0)+1; }
+      if(old.emiCounted){ const l0=settings.loans.find(l=>l.category===old.category); if(l0){ l0.monthsLeft=(Number(l0.monthsLeft)||0)+1; if(old.prinDelta) l0.principal=(Number(l0.principal)||0)+old.prinDelta; } }
       entries.splice(idx,1); }
   }
   const amount=Math.round(Number(o.amount)*100)/100;
@@ -1280,12 +1371,15 @@ function saveEntryData(o, replaceId){
     const avail=g?(Number(g.current)||0):poolBal();
     if(amount>avail+0.001){ undo(); alert("Only "+fmt(avail)+" is available in "+(g?g.name:"General savings")+". Add savings first or choose another source."); return false; }
   }
-  const entry={id:old?old.id:uid(), date:o.date, type:o.type, category:o.category, amount, note:o.note, goal:o.goal, createdAt:old?old.createdAt:Date.now()};
+  const entry={id:old?old.id:uid(), date:o.date, type:o.type, category:o.category, amount, note:o.note, goal:o.goal, lendFlow:(old&&old.lendFlow)||undefined, lendId:(old&&old.lendId)||undefined, lendPay:(old&&old.lendPay)||undefined, lendOut:(old&&old.lendOut)||undefined, loanRecv:(old&&old.loanRecv)||undefined, loanId:(old&&old.loanId)||undefined, payLoan:(old&&old.payLoan)||undefined, prevMonths:old?old.prevMonths:undefined, prevPrincipal:old?old.prevPrincipal:undefined, createdAt:old?old.createdAt:Date.now()};
   applyGoal(entry);
   if(o.type==="Expense"){
     const l=settings.loans.find(l=>l.category===o.category);
-    if(l && Number(l.monthsLeft)>0 && !entries.some(x=>x.emiCounted&&x.category===o.category&&monthKey(x.date)===monthKey(o.date))){ l.monthsLeft=Number(l.monthsLeft)-1; entry.emiCounted=true; }
+    if(l && Number(l.monthsLeft)>0 && !entries.some(x=>x.emiCounted&&x.category===o.category&&monthKey(x.date)===monthKey(o.date))){ l.monthsLeft=Number(l.monthsLeft)-1; entry.emiCounted=true; var P0=Number(l.principal)||0; if(P0>0){ var P1=Math.max(0,P0*(1+(Number(l.rate)||0)/1200)-amount); entry.prinDelta=P0-P1; l.principal=P1; } }
   }
+  if(entry.loanRecv){ var ll=settings.loans.find(function(x){ return x.id===entry.loanId; }); if(ll) ll.received=amount; }
+  if(entry.lendOut){ var lo=lends().find(function(x){ return x.id===entry.lendId; }); if(lo) lo.principal=amount; }
+  if(entry.lendPay){ var lp=lends().find(function(x){ return x.id===entry.lendId; }), pp=lp&&(lp.pays||[]).find(function(x){ return x.id===entry.lendPay; }); if(pp){ pp.amount=amount; pp.date=entry.date; } }
   entries.push(entry); saveEntries(); saveSettings(); return true;
 }
 var _eid=null;
@@ -1335,11 +1429,245 @@ document.getElementById("addGoalBtn").addEventListener("click",addGoal);
 document.getElementById("hMonth").addEventListener("change",renderHistory);
 document.getElementById("hSearch").addEventListener("input",renderHistory);
 
+/* ---------- loans v2: types, money received, cards, due dates ---------- */
+var LOAN_KINDS=["Personal","Business","Vehicle","Home","Education","Gold","Credit Card","Other"];
+function loanBoot(){ var add=0; settings.loans.forEach(function(l){ if(!l.id) l.id=uid(); if(l.category&&settings.cats&&!allCatNames().includes(l.category)){ settings.cats.Expense.push({name:l.category,color:"#2c3e4a",custom:true}); add=1; } }); if(add){ saveSettings(); if(window._ready) populateCategorySelect(); } if(settings.cats) ensureCat("Income","Loan Received","#6b5228"); }
+function ensureCat(t,n,c){ if(!settings.cats[t].some(function(x){ return x.name===n; })) settings.cats[t].push({name:n,color:c}); }
+function loanOut(l){ var m=Number(l.monthsLeft)||0; if(m<=0) return 0; var p=Number(l.principal)||0; return p>0?p:(Number(l.emi)||0)*m; }
+function calcEmi(P,rate,n){ var r=rate/1200; if(!n) return P; return r>0?P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1):P/n; }
+function monthsFor(P,rate,emi){ var r=rate/1200; if(emi<=0) return 0; if(r>0){ if(P*r>=emi) return 999; return Math.ceil(-Math.log(1-P*r/emi)/Math.log(1+r)); } return Math.ceil(P/emi); }
+function openLoanSheet(){
+  var f=function(id,lab,t,ph){ return '<div class="field" style="margin-top:10px;"><label>'+lab+'</label><input type="'+t+'" id="'+id+'" '+(ph||"")+'></div>'; };
+  openSheet("Add Loan / Credit Card",
+   '<p class="sheet-note">The amount you received is added to your current balance.</p>'+
+   '<div class="field"><label>Type</label><select id="lKind" onchange="loanKindChange()">'+LOAN_KINDS.map(function(k){ return '<option>'+k+'</option>'; }).join("")+'</select></div>'+
+   f("lName","Name (e.g. HDFC Card, Bike Loan)","text")+f("lLender","Lender / bank (optional)","text")+
+   f("lAmt","Amount received / spent on card (₹)","number",'min="0" step="0.01"')+f("lDate","Date received","date")+
+   '<div id="lCard" style="display:none;"><div class="field" style="margin-top:10px;"><label>How will you repay?</label><select id="lMode" onchange="loanKindChange()"><option value="emi">Converted to EMI</option><option value="bill">Just a card expense — pay the bill soon</option></select></div>'+
+   f("lLimit","Card credit limit (₹, optional)","number")+f("lBill","Bill due date","date")+'</div>'+
+   '<div id="lTerms">'+f("lRate","Interest % per year","number",'step="0.01"')+f("lTen","Tenure (months)","number")+f("lEmi","Monthly EMI (₹) — leave blank to calculate","number")+f("lDue","EMI due day of month (1-31, optional)","number")+'</div>'+
+   '<div class="sheet-actions"><button class="btn" type="button" onclick="saveLoan()">Add &amp; credit my balance</button></div>');
+  document.getElementById("lDate").value=todayStr(); loanKindChange();
+}
+function loanKindChange(){
+  var card=document.getElementById("lKind").value==="Credit Card", bill=card&&document.getElementById("lMode").value==="bill";
+  document.getElementById("lCard").style.display=card?"":"none";
+  document.getElementById("lBill").parentNode.style.display=bill?"":"none";
+  document.getElementById("lTerms").style.display=bill?"none":"";
+}
+function saveLoan(){
+  var kind=document.getElementById("lKind").value, card=kind==="Credit Card", bill=card&&document.getElementById("lMode").value==="bill";
+  var amt=Math.round(Number(document.getElementById("lAmt").value)*100)/100, date=document.getElementById("lDate").value||todayStr();
+  var rate=Number(document.getElementById("lRate").value)||0, ten=bill?1:Math.round(Number(document.getElementById("lTen").value)||0);
+  if(!(amt>0)){ alert("Enter the amount you received."); return; }
+  if(!bill&&ten<1){ alert("Enter the tenure in months."); return; }
+  if(bill&&!document.getElementById("lBill").value){ alert("Enter the bill due date."); return; }
+  var emi=bill?amt:(Number(document.getElementById("lEmi").value)||Math.round(calcEmi(amt,rate,ten)));
+  var name=cleanName(document.getElementById("lName").value)||(kind+" "+(card?"Card":"Loan")), base=(bill?"Card Bill - ":"EMI - ")+name, cat=base, n=1;
+  while(allCatNames().indexOf(cat)>=0) cat=base+" "+(++n);
+  settings.cats.Expense.push({name:cat,color:"#2c3e4a",custom:true}); ensureCat("Income","Loan Received","#6b5228");
+  var l={id:uid(),name:name,category:cat,kind:kind,lender:cleanName(document.getElementById("lLender").value),emi:emi,monthsLeft:ten,tenure:ten,rate:rate,received:amt,date:date,mode:bill?"bill":"emi",
+    dueDay:bill?0:Math.min(31,Number(document.getElementById("lDue").value)||0),billDue:bill?document.getElementById("lBill").value:"",limit:card?(Number(document.getElementById("lLimit").value)||0):0};
+  settings.loans.push(l);
+  entries.push({id:uid(),date:date,type:"Income",category:"Loan Received",amount:amt,note:kind+" — "+name+(l.lender?" ("+l.lender+")":""),loanId:l.id,loanRecv:true,createdAt:Date.now()});
+  saveEntries(); saveSettings(); closeSheet(); populateCategorySelect(); renderAll(); showToast(fmt(amt)+" added to your balance");
+}
+function renderLoans(){
+  loanBoot();
+  var list=document.getElementById("loansList"), m=currentMonth();
+  list.innerHTML=settings.loans.map(function(l,i){
+    var left=Number(l.monthsLeft)>0, paid=entries.some(function(e){ return e.type==="Expense"&&e.category===l.category&&monthKey(e.date)===m; });
+    var badge=left?(paid?'<b style="color:var(--forest)">✓ Paid for '+monthLabel(m)+'</b>':'<b style="color:var(--oxblood)">Due — not logged for '+monthLabel(m)+'</b>'):'<b>Cleared</b>';
+    var ten=Number(l.tenure)||0, pct=ten?Math.max(0,Math.min(100,(ten-(Number(l.monthsLeft)||0))/ten*100)):0, meta="";
+    if(ten>1&&left){ var d=new Date(); d.setMonth(d.getMonth()+Number(l.monthsLeft)); meta+='<div class="lbar"><i style="width:'+pct.toFixed(0)+'%"></i></div><div class="lmeta">'+pct.toFixed(0)+'% repaid · debt-free by '+d.toLocaleDateString("en-IN",{month:"short",year:"numeric"})+(l.received&&ten?' · total interest ≈ '+fmt(Math.max(0,l.emi*ten-l.received)):"")+'</div>'; }
+    if(Number(l.received)>0) meta+='<div class="lmeta">Received '+fmt(l.received)+(l.date?' on '+l.date:'')+' · added to your balance</div>';
+    if(l.mode==="bill"&&l.billDue&&left) meta+='<div class="lmeta">Bill of '+fmt(l.emi)+' due on '+l.billDue+'</div>';
+    if(Number(l.limit)>0){ var used=settings.loans.filter(function(x){ return x.kind==="Credit Card"&&x.name===l.name; }).reduce(function(a,x){ return a+loanOut(x); },0); meta+='<div class="lmeta">Limit '+fmt(l.limit)+' · used '+Math.min(999,used/l.limit*100).toFixed(0)+'%</div>'; }
+    var inp=function(lab,f,v){ return '<div class="field"><label>'+lab+'</label><input type="number" value="'+(v||"")+'" onchange="updateLoan('+i+",'"+f+"',this.value)\"></div>"; };
+    var acts=(left?((paid||!(Number(l.emi)>0)?"":'<button class="btn small" type="button" onclick="payEmi('+i+')">Pay this month\'s '+(l.mode==="bill"?"bill":"EMI")+'</button>')+(l.mode==="bill"?"":'<button class="btn small" type="button" onclick="partPay('+i+')">Part-pay / Foreclose</button>')):"");
+    return '<div class="loan-card"><span class="kind-chip">'+escHtml(l.kind||"Loan")+(l.lender?' · '+escHtml(l.lender):"")+'</span>'+
+     '<div class="loan-top"><div class="field"><label>Name</label><input type="text" value="'+escHtml(l.name)+'" onchange="updateLoan('+i+',\'name\',this.value)"></div><button class="del-btn" title="Remove" onclick="removeLoan('+i+')">✕</button></div>'+
+     '<div class="lmeta">Log payments as: '+escHtml(l.category)+'<br>'+badge+'</div>'+meta+
+     '<div class="loan-row" style="margin-top:8px;">'+inp("Monthly EMI (₹)","emi",l.emi)+inp("Months left","monthsLeft",l.monthsLeft)+inp("Principal left","principal",l.principal)+inp("Interest %","rate",l.rate)+inp("Due day","dueDay",l.dueDay)+'</div>'+
+     (acts?'<div class="lact">'+acts+'</div>':"")+'</div>'; }).join("")||'<p class="empty-note">No loans yet.</p>';
+  document.getElementById("totalEmi").textContent=fmt(settings.loans.filter(function(l){ return Number(l.monthsLeft)>0; }).reduce(function(a,l){ return a+Number(l.emi); },0));
+  document.getElementById("openingBalanceInput").value=settings.openingBalance;
+}
+function updateLoan(i, field, val){
+  settings.loans[i][field] = (field==='name') ? val : Number(val)||0;
+  saveSettings(); renderLoans(); renderDashboard();
+}
+function loanPrincipal(l){ var emi=Number(l.emi)||0, mo=Number(l.monthsLeft)||0, r=(Number(l.rate)||0)/1200; var P=Number(l.principal)>0?Number(l.principal):(r>0?emi*(1-Math.pow(1+r,-mo))/r:emi*mo); return Math.round(P); }
+function partPay(i){
+  var l=settings.loans[i], P=loanPrincipal(l);
+  openSheet("Part-pay / Foreclose",'<p class="sheet-note">'+escHtml(l.name)+' — outstanding about <b>'+fmt(P)+'</b>. The amount you pay is deducted from your current balance.</p>'+
+   '<div class="field"><label>Extra payment (₹)</label><input type="number" id="ppAmt" min="0" step="0.01" placeholder="e.g. 5000"></div>'+
+   '<div class="sheet-actions"><button class="btn" type="button" onclick="doPartPay('+i+',false)">Pay this extra amount</button>'+
+   '<button class="btn" type="button" onclick="doPartPay('+i+',true)">Foreclose in full — pay '+fmt(P)+'</button></div>');
+}
+function doPartPay(i,full){
+  var l=settings.loans[i], P=loanPrincipal(l), a=full?P:Math.round(Number(document.getElementById("ppAmt").value)*100)/100;
+  if(!(a>0)){ alert("Enter an amount."); return; }
+  var old=Number(l.monthsLeft)||0, prevP=Number(l.principal)||0;
+  if(a>=P-0.5){ l.monthsLeft=0; l.principal=0; } else { l.principal=P-a; l.monthsLeft=Math.min(old,monthsFor(l.principal,Number(l.rate)||0,Number(l.emi)||0)); }
+  entries.push({id:uid(),date:todayStr(),type:"Expense",category:l.category,amount:a,note:(l.monthsLeft?"Part-payment":"Foreclosure")+" — "+l.name,payLoan:l.id,prevMonths:old,prevPrincipal:prevP,createdAt:Date.now()});
+  saveEntries(); saveSettings(); closeSheet(); renderAll(); showToast(l.monthsLeft?("Saves "+(old-l.monthsLeft)+" month(s)"):"Loan cleared · "+fmt(a)+" paid");
+}
+function payEmi(i){
+  var l=settings.loans[i];
+  if(saveEntryData({date:todayStr(),type:"Expense",category:l.category,amount:Number(l.emi),note:(l.mode==="bill"?"Card bill — ":"EMI — ")+l.name,goal:""})){ renderAll(); showToast(fmt(l.emi)+" paid · deducted from balance"); }
+}
+(function(){
+  var fc=document.getElementById("fCategory"), done="";
+  fc.addEventListener("change",function(){
+    var amt=document.getElementById("fAmount"), note=document.getElementById("fNote");
+    var l=document.getElementById("fType").value==="Expense"&&settings.loans.find(function(x){ return x.category===fc.value&&Number(x.monthsLeft)>0; });
+    if(l){ if(!amt.value||amt.value===done) amt.value=done=String(l.emi); if(!note.value) note.value=(l.mode==="bill"?"Card bill — ":"EMI — ")+l.name; }
+  });
+})();
+function renderDue(){
+  var el=document.getElementById("dueStrip"); if(!el) return;
+  var t=new Date(), td=todayStr(), m=monthKey(td), out=[];
+  settings.loans.forEach(function(l){
+    if(!(Number(l.monthsLeft)>0)) return;
+    var paid=entries.some(function(e){ return e.type==="Expense"&&e.category===l.category&&monthKey(e.date)===m; }), days=null;
+    if(l.mode==="bill"&&l.billDue) days=Math.round((new Date(l.billDue)-new Date(td))/864e5);
+    else if(Number(l.dueDay)>0&&!paid) days=Math.min(Number(l.dueDay),new Date(t.getFullYear(),t.getMonth()+1,0).getDate())-t.getDate();
+    if(days!==null&&days<=7) out.push({l:l,d:days});
+  });
+  out.sort(function(a,b){ return a.d-b.d; });
+  el.innerHTML=out.length?'<div class="due-strip"><h3>Coming due</h3>'+out.map(function(o){ return '<div class="due-row"><span>'+escHtml(o.l.name)+' · '+fmt(o.l.emi)+'</span><b style="color:var(--oxblood)">'+(o.d<0?"overdue "+(-o.d)+"d":o.d===0?"today":"in "+o.d+"d")+'</b></div>'; }).join("")+'</div>':"";
+}
+var _rd=renderDashboard; renderDashboard=function(){ _rd(); renderDue(); };
+
+/* ---------- lending: money given to others ---------- */
+var RELS=["Friend","Relative","Neighbour","Colleague","Customer","Business partner","Other"];
+function lends(){ return settings.lends||(settings.lends=[]); }
+function lendBoot(){ if(!settings.cats) return; ensureCat("Expense","Money Lent","#6b5228"); ensureCat("Income","Lent Money Received","#2f5a3a"); }
+function pd(x){ var a=String(x).split("-"); return new Date(+a[0],+a[1]-1,+a[2]); }
+function dayDiff(a,b){ return Math.round((a-b)/864e5); }
+function lendCalc(L){
+  var P=Number(L.principal)||0, d=Number(L.days)||0, r=Number(L.rate)||0, I=0;
+  if(L.itype==="month") I=P*r/100*d/30; else if(L.itype==="year") I=P*r/100*d/365; else if(L.itype==="day") I=P*r/100*d; else if(L.itype==="flat") I=r;
+  I=Math.round(I);
+  var cnt=Math.max(1,L.freq==="daily"?d:L.freq==="weekly"?Math.ceil(d/7):L.freq==="monthly"?Math.ceil(d/30):1);
+  var total=P+I, inst=Number(L.inst)||Math.ceil(total/cnt), paid=(L.pays||[]).reduce(function(a,p){ return a+Number(p.amount); },0);
+  var start=pd(L.date), today=pd(todayStr()), el=dayDiff(today,start), due=new Date(start); due.setDate(due.getDate()+d);
+  var k=L.freq==="daily"?el:L.freq==="weekly"?Math.floor(el/7):L.freq==="monthly"?Math.floor(el/30):(el>=d?1:0);
+  var expected=k>=cnt?total:Math.max(0,k)*inst, out=Math.max(0,total-paid), behind=Math.max(0,Math.min(total,expected)-paid);
+  var od=out>0?Math.max(0,dayDiff(today,due)):0;
+  return {P:P,I:I,total:total,inst:inst,cnt:cnt,paid:paid,out:out,behind:behind,due:due,od:od,fee:od*(Number(L.late)||0),closed:out<=0};
+}
+function phoneWa(p){ var n=String(p||"").replace(/\D/g,""); return n.length===10?"91"+n:n; }
+function lendMsg(L,c){
+  var ask=c.behind>0?c.behind:Math.min(c.inst,c.out);
+  return "Hello "+L.name+", a gentle reminder about the money I gave you on "+L.date+". Amount due now: "+fmt(ask)+". Total pending: "+fmt(c.out+c.fee)+(c.od>0?" ("+c.od+" days past the due date)":"")+". Kindly pay at the earliest. Thank you.";
+}
+function lendForm(i){
+  var L=i===undefined?{pays:[],itype:"month",freq:"daily",date:todayStr(),relation:"Friend"}:lends()[i], ed=i!==undefined;
+  var f=function(id,lab,t,v,x){ return '<div class="field" style="margin-top:10px;"><label>'+lab+'</label><input type="'+t+'" id="'+id+'" value="'+escHtml(v===undefined||v===null?"":v)+'" '+(x||"")+'></div>'; };
+  var sel=function(id,lab,opts,v){ return '<div class="field" style="margin-top:10px;"><label>'+lab+'</label><select id="'+id+'">'+opts.map(function(o){ return '<option value="'+o[0]+'"'+(o[0]===v?" selected":"")+'>'+o[1]+'</option>'; }).join("")+'</select></div>'; };
+  openSheet(ed?"Edit lending":"Lend money",
+   '<p class="sheet-note">'+(ed?"Amount and date can’t be changed here — edit that entry in the Ledger Book.":"The amount is deducted from your current balance and tracked here until collected.")+'</p>'+
+   f("ldName","Borrower’s name","text",L.name)+sel("ldRel","Relation with you",RELS.map(function(r){ return [r,r]; }),L.relation)+
+   f("ldPhone","Mobile number","tel",L.phone,'inputmode="tel"')+f("ldAddr","Address","text",L.address)+f("ldId","ID proof note (e.g. Aadhaar last 4 digits)","text",L.idnote)+
+   f("ldGuar","Guarantor name &amp; phone (optional)","text",L.guarantor)+f("ldSec","Security / collateral held (optional)","text",L.security)+
+   f("ldAmt","Amount lent (₹)","number",L.principal,'min="0" step="0.01"'+(ed?" disabled":""))+f("ldDate","Date given","date",L.date,ed?"disabled":"")+
+   sel("ldType","Interest type",[["none","No interest"],["month","% per month (simple)"],["year","% per year (simple)"],["day","% per day"],["flat","Fixed interest amount (₹)"]],L.itype)+
+   f("ldRate","Interest rate % (or ₹ if fixed)","number",L.rate,'step="0.01"')+f("ldDays","Total duration (days)","number",L.days)+
+   sel("ldFreq","Collection","daily,weekly,monthly,lump".split(",").map(function(k){ return [k,{daily:"Daily",weekly:"Weekly",monthly:"Monthly",lump:"One lump sum at the end"}[k]]; }),L.freq)+
+   f("ldInst","Instalment each time (₹) — blank to calculate","number",L.inst)+f("ldLate","Late fee per overdue day (₹, optional)","number",L.late)+f("ldNote","Notes","text",L.note)+
+   '<div class="sheet-actions"><button class="btn" type="button" onclick="saveLend('+(ed?i:"undefined")+')">'+(ed?"Save changes":"Lend &amp; deduct from balance")+'</button></div>');
+}
+function saveLend(i){
+  var g=function(id){ return document.getElementById(id).value; }, ed=i!==undefined, L=ed?lends()[i]:{id:uid(),pays:[]};
+  var name=cleanName(g("ldName")); if(!name){ alert("Enter the borrower’s name."); return; }
+  var amt=ed?L.principal:Math.round(Number(g("ldAmt"))*100)/100, days=Math.round(Number(g("ldDays"))||0);
+  if(!(amt>0)){ alert("Enter the amount lent."); return; } if(days<1){ alert("Enter the duration in days."); return; }
+  Object.assign(L,{name:name,relation:g("ldRel"),phone:g("ldPhone").trim(),address:cleanName(g("ldAddr")),idnote:cleanName(g("ldId")),guarantor:cleanName(g("ldGuar")),security:cleanName(g("ldSec")),
+    itype:g("ldType"),rate:Number(g("ldRate"))||0,days:days,freq:g("ldFreq"),inst:Number(g("ldInst"))||0,late:Number(g("ldLate"))||0,note:cleanName(g("ldNote"))});
+  if(!ed){ L.principal=amt; L.date=g("ldDate")||todayStr(); lends().push(L); lendBoot();
+    entries.push({id:uid(),date:L.date,type:"Expense",category:"Money Lent",amount:amt,note:"Lent to "+name,lendFlow:true,lendOut:true,lendId:L.id,createdAt:Date.now()}); saveEntries(); }
+  saveSettings(); closeSheet(); populateCategorySelect(); renderAll(); showToast(ed?"Details saved":fmt(amt)+" lent to "+name);
+}
+function collectForm(i){
+  var L=lends()[i], c=lendCalc(L);
+  openSheet("Collect from "+escHtml(L.name),'<p class="sheet-note">Pending: <b>'+fmt(c.out)+'</b>'+(c.fee?' + late fee '+fmt(c.fee):"")+'. The money is added to your current balance.</p>'+
+   '<div class="field"><label>Amount received (₹)</label><input type="number" id="cAmt" min="0" step="0.01" value="'+Math.min(c.out,c.behind>0?c.behind:c.inst)+'"></div>'+
+   '<div class="field" style="margin-top:10px;"><label>Date</label><input type="date" id="cDate" value="'+todayStr()+'"></div>'+
+   '<div class="field" style="margin-top:10px;"><label>Note</label><input type="text" id="cNote" placeholder="e.g. paid by UPI"></div>'+
+   '<div class="sheet-actions"><button class="btn" type="button" onclick="doCollect('+i+')">Record collection</button></div>');
+}
+function doCollect(i){
+  var L=lends()[i], a=Math.round(Number(document.getElementById("cAmt").value)*100)/100, d=document.getElementById("cDate").value||todayStr();
+  if(!(a>0)){ alert("Enter the amount received."); return; }
+  var pid=uid(), note=cleanName(document.getElementById("cNote").value); lendBoot();
+  L.pays=(L.pays||[]); L.pays.push({id:pid,date:d,amount:a,note:note});
+  entries.push({id:uid(),date:d,type:"Income",category:"Lent Money Received",amount:a,note:"Collected from "+L.name+(note?" — "+note:""),lendFlow:true,lendPay:pid,lendId:L.id,createdAt:Date.now()});
+  saveEntries(); saveSettings(); closeSheet(); renderAll(); showToast(fmt(a)+" collected from "+L.name);
+}
+function lendHistory(i){
+  var L=lends()[i], c=lendCalc(L), rows=(L.pays||[]).slice().sort(function(a,b){ return a.date<b.date?1:-1; });
+  var txt="Statement — "+L.name+": lent "+fmt(c.P)+" on "+L.date+", total payable "+fmt(c.total)+", received "+fmt(c.paid)+", pending "+fmt(c.out)+".";
+  openSheet(escHtml(L.name)+" — statement",'<div class="worth-row"><span>Lent on '+L.date+'</span><span>'+fmt(c.P)+'</span></div><div class="worth-row"><span>Interest</span><span>'+fmt(c.I)+'</span></div><div class="worth-row"><span>Total payable</span><span>'+fmt(c.total)+'</span></div><div class="worth-row"><span>Received</span><span style="color:var(--forest)">'+fmt(c.paid)+'</span></div><div class="worth-row total"><span>Pending</span><span>'+fmt(c.out)+'</span></div>'+
+   (rows.length?rows.map(function(p){ return '<div class="worth-row"><span>'+p.date+(p.note?' · '+escHtml(p.note):"")+'</span><span>'+fmt(p.amount)+'</span></div>'; }).join(""):'<p class="sheet-meta">No collections yet.</p>')+
+   (L.phone?'<div class="sheet-actions"><a class="btn" target="_blank" rel="noopener" href="https://wa.me/'+phoneWa(L.phone)+'?text='+encodeURIComponent(txt)+'">Send statement on WhatsApp</a></div>':""));
+}
+function delLend(i){ askYes("Delete this lending and all its collections? Your balance will be adjusted back.","Delete lending",function(){ var L=lends()[i]; entries=entries.filter(function(e){ return e.lendId!==L.id; }); lends().splice(i,1); saveEntries(); saveSettings(); renderAll(); }); }
+function renderLending(){
+  lendBoot(); var list=document.getElementById("lendList"); if(!list) return;
+  var q=(document.getElementById("lendSearch").value||"").toLowerCase(), T={out:0,paid:0,int:0,od:0};
+  var items=lends().map(function(L,i){ var c=lendCalc(L); T.out+=c.out; T.paid+=c.paid; T.int+=c.I; if(c.od>0||c.behind>0) T.od++; return {L:L,i:i,c:c}; });
+  items=items.filter(function(o){ return !q||(o.L.name+" "+(o.L.phone||"")+" "+(o.L.address||"")).toLowerCase().indexOf(q)>=0; }).sort(function(a,b){ return (b.c.od-a.c.od)||(b.c.behind-a.c.behind)||(a.c.closed-b.c.closed); });
+  document.getElementById("lendStats").innerHTML=[["To collect",fmt(T.out)],["Collected so far",fmt(T.paid)],["Interest expected",fmt(T.int)],["Need follow-up",T.od]].map(function(x){ return '<div class="stat"><div class="stat-label">'+x[0]+'</div><div class="stat-value">'+x[1]+'</div></div>'; }).join("");
+  list.innerHTML=items.map(function(o){
+    var L=o.L,c=o.c, i=o.i, pct=c.total?Math.min(100,c.paid/c.total*100):0, wa=phoneWa(L.phone), msg=encodeURIComponent(lendMsg(L,c));
+    var badge=c.closed?['Settled','var(--forest)']:c.od>0?['Overdue '+c.od+'d','var(--oxblood)']:c.behind>0?['Behind '+fmt(c.behind),'var(--oxblood)']:['On track','var(--brass)'];
+    return '<div class="loan-card"><span class="kind-chip">'+escHtml(L.relation||"")+'</span><span class="badge" style="color:'+badge[1]+'">'+badge[0]+'</span>'+
+     '<h3 style="margin:8px 0 2px;font-size:20px;text-transform:none;letter-spacing:0;color:var(--ink);">'+escHtml(L.name)+'</h3>'+
+     '<div class="lmeta">'+(L.phone?escHtml(L.phone)+' · ':"")+escHtml(L.address||"")+'</div>'+
+     '<div class="lmeta">Lent <b>'+fmt(c.P)+'</b> on '+L.date+' · '+({none:"no interest",month:L.rate+"% / month",year:L.rate+"% / year",day:L.rate+"% / day",flat:"fixed "+fmt(L.rate)}[L.itype])+' · '+L.days+' days, '+({daily:"daily",weekly:"weekly",monthly:"monthly",lump:"lump sum"}[L.freq])+(L.freq==="lump"?"":' of '+fmt(c.inst))+'</div>'+
+     '<div class="lbar"><i style="width:'+pct.toFixed(0)+'%"></i></div>'+
+     '<div class="lmeta">Received '+fmt(c.paid)+' of '+fmt(c.total)+' · pending <b>'+fmt(c.out)+'</b> · due '+ds(c.due)+(c.fee?' · late fee '+fmt(c.fee):"")+'</div>'+
+     (L.guarantor?'<div class="lmeta">Guarantor: '+escHtml(L.guarantor)+'</div>':"")+(L.security?'<div class="lmeta">Security: '+escHtml(L.security)+'</div>':"")+(L.note?'<div class="lmeta"><i>'+escHtml(L.note)+'</i></div>':"")+
+     '<div class="lact">'+(c.closed?"":'<button class="btn small" type="button" onclick="collectForm('+i+')">Collect</button>')+
+     (wa&&!c.closed?'<a class="btn small" target="_blank" rel="noopener" href="https://wa.me/'+wa+'?text='+msg+'">WhatsApp</a><a class="btn small" href="sms:'+escHtml(L.phone)+'?&body='+msg+'">SMS</a>':"")+
+     (L.phone?'<a class="btn small" href="tel:'+escHtml(L.phone)+'">Call</a>':"")+
+     '<button class="btn small" type="button" onclick="lendHistory('+i+')">Statement</button><button class="btn small" type="button" onclick="lendForm('+i+')">Edit</button><button class="btn small" type="button" onclick="delLend('+i+')">Delete</button></div></div>'; }).join("")||'<p class="empty-note">Nobody owes you yet. Tap “Lend money” to start your register.</p>';
+}
+function ds(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+document.getElementById("addLendBtn").addEventListener("click",function(){ lendForm(); });
+document.getElementById("lendSearch").addEventListener("input",renderLending);
+var _ra=renderAll; renderAll=function(){ _ra(); renderLending(); };
+
 /* ---------- init ---------- */
-load(); migrateCats(); try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){} if(entries.length) mirrorWrite();
+load(); migrateCats(); loanBoot(); lendBoot(); try{ if(navigator.storage&&navigator.storage.persist) navigator.storage.persist(); }catch(e){} if(entries.length) mirrorWrite();
 document.getElementById("fDate").value = todayStr();
-populateCategorySelect();
+populateCategorySelect(); window._ready=1;
 renderAll();
+
+/* ---------- sealed letter v2 ---------- */
+(function(){
+  const env=document.getElementById("envelope"), hero=document.getElementById("heroCard"), wax=document.getElementById("waxSeal"), fx=document.getElementById("envFx");
+  var h='<i class="gl"></i>', i, a, r;
+  for(i=0;i<7;i++){ a=i*0.9+0.3; r=46+(i%3)*18; h+='<i class="pf" style="--x:'+Math.round(Math.cos(a)*r)+'px;--y:'+Math.round(Math.sin(a)*r*0.8-12)+'px;--s:'+(1.7+(i%3)*0.4)+';animation-delay:'+(i*35)+'ms"></i>'; }
+  for(i=0;i<6;i++){ h+='<i class="cr" style="--x:'+((i%2?1:-1)*(38+i*13))+'px;--y:'+(46+(i%3)*24)+'px;--r:'+((i%2?1:-1)*(160+i*40))+'deg;animation-delay:'+(i*20)+'ms"></i>'; }
+  for(i=0;i<14;i++){ a=i*0.45; r=62+(i%4)*20; h+='<i class="sp" style="--x:'+Math.round(Math.cos(a)*r)+'px;--y:'+Math.round(Math.sin(a)*r*0.8)+'px;animation-delay:'+(i*28)+'ms"></i>'; }
+  fx.innerHTML=h;
+  var bt; function burst(delay){ clearTimeout(bt); bt=setTimeout(function(){ fx.classList.remove("go"); void fx.offsetWidth; fx.classList.add("go"); setTimeout(function(){ fx.classList.remove("go"); },2000); },delay); }
+  function setOpen(o){
+    env.classList.toggle("open",o);
+    hero.setAttribute("aria-hidden",o?"false":"true");
+    hero.tabIndex=o?0:-1;
+    if(o){ hero.setAttribute("role","button"); hero.setAttribute("aria-label","Balance shown. Activate to seal the letter again."); }
+    else { hero.removeAttribute("role"); hero.removeAttribute("aria-label"); }
+    burst(o?0:950);
+    if(o) setTimeout(function(){ delete _shown.heroBalance; countTo("heroBalance",allTimeBalance()); },650);
+  }
+  wax.addEventListener("click",function(){ setOpen(true); });
+  hero.addEventListener("click",function(){ if(env.classList.contains("open")) setOpen(false); });
+  hero.addEventListener("keydown",function(ev){ if((ev.key==="Enter"||ev.key===" ")&&env.classList.contains("open")){ ev.preventDefault(); setOpen(false); } });
+})();
 
 /* ---------- opening curtain ---------- */
 (function(){
